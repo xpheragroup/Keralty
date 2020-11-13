@@ -276,7 +276,7 @@
             </form>
         </field>
     </record>
-
+<!--
     <record id="keralty_formulario_calculos_kanban" model="ir.ui.view">
         <field name="name">Formulario de Cálculos Kanban</field>
         <field name="model">keralty_module.calculos</field>
@@ -288,8 +288,7 @@
             </kanban>
         </field>
     </record>
-
-
+-->
     <!-- Top menu item -->
     <menuitem name="Keralty" id="keralty_module.menu_root"
         web_icon="keralty_module,static/description/logo.png"/>
