@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+import logging
 
+_logger = logging.getLogger(__name__)
 # class FormularioParametrizacion(models.Model):
 #     _name = 'keralty_module.formulario.param'
 #     _description = 'Formulario Parametrización'
@@ -41,24 +43,152 @@ class FormularioCliente(models.Model):
     #
     nombre_proyecto = fields.Char(required=True, string="Nombre Proyecto")
     # Configuración empresa
-    sede = fields.Many2many(string="Sedes", comodel_name='keralty_module.sede',
-                    help="Sedes asociadas")
+    empresa_seleccionada = fields.Many2many(string="Selección de Empresa(s)",
+                    comodel_name='product.attribute.value',
+                    relation="product_cliente_empresa",
+                    help="Selección de Empresas asociadas a la solicitud.",
+                    domain="[['attribute_id.name','ilike','Empresa']]",
+                    required=True)
+    producto_seleccionado = fields.Many2many(string="Selección de Producto(s)",
+                    comodel_name='product.attribute.value',
+                    relation="product_cliente_producto",
+                    help="Selección de Productos asociados a la solicitud.",
+                    domain="[['attribute_id.name','ilike','Producto']]",
+                    required=True)
+    sede_seleccionada = fields.Many2many(string="Selección de Sede(s)",
+                    comodel_name='product.template',
+                    help="Selección de Sede(s) asociadas a la solicitud.",
+                    domain="[('categ_id.name','ilike','Sede')]",
+                    required=True)
+    tipo_intervencion = fields.Selection([('sede_nueva', 'Sede Nueva'),('adecuacion', 'Adecuación'),('remodelacion', 'Remodelación'),('ampliacion', 'Ampliación')])
     # Ocupación centro médico
     numero_usuarios = fields.Float(string="Número de Usuarios", required=True, help="Número de Usuarios")
     numero_empleados = fields.Float(string="Número de Empleados", required=True, help="Número de Empleados")
     terceros = fields.Float(string="Terceros", required=True, help="Terceros")
 
     # Listado de áreas asociadas en campo BoM de mrp.production
-    #move_raw_ids = fields.Many2many('product.template')
+    sedes_seleccionadas = fields.Many2many(string="Selección de Sede(s)",
+                    comodel_name='mrp.bom',
+                    relation="bom_cliente_sedes",
+                    help="Selección de Sedes asociados a la solicitud.",
+                    domain="[('product_tmpl_id','=',sede_seleccionada)]",
+                    required=True)
+    # TODO: encontrar el filtro necesario por cada una de las variantes E,mpresa y Producto, por lo pronto se dejan solamente las SEDES.
+    # TODO: Al momento de editar cada línea no afecte la cantidad preconfigurada
+    areas_asociadas_sede = fields.Many2many(string="Selección de Áreas",
+                    comodel_name='mrp.bom.line',
+                    relation="bom_line_cliente_areas_asistenciales",
+                    column1="product_id",
+                    column2="product_qty",
+                    help="Selección de Áreas asociadas a la(s) Sede(s) seleccionada(s).",
+                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
+                    required=True,
+                    copy=False)
 
+    # Sistema de Estados
+    state = fields.Selection([
+        ('draft', 'Borrador'),
+        ('confirmed', 'Confirmado'),
+        ('done', 'Hecho'),
+        ('cancel', 'Cancelado')], string='Estado',
+        copy=False, index=True, readonly=True,
+        store=True, tracking=True,
+        help=" * Borrador: El poryecto se encuentra en edición.\n"
+             " * Confirmado: El proyecto ha sido confirmado y no es editable por el cliente.\n"
+             " * Hecho: El proyecto se ha ejecutado. \n"
+             " * Cancelado: El proyecto ha sido cancelado.")
+
+    #
+    '''
+        Copia LdM
+        Cuando cambia la sede seleccionada copia la lista de materiales (LdM) de la Sede (product)
+        y la muestra en el campo areas_asociadas_sede     
+    '''
+    @api.onchange('sede_seleccionada')
+    def _onchange_sede_seleccionada(self):
+        res = {}
+        objetoBusqueda = None
+        self.areas_asociadas_sede = None
+
+        for sede_product_template in self.sede_seleccionada:
+            for area in sede_product_template.bom_ids:
+                _logger.critical("área: ")
+                _logger.critical(area)
+                _logger.critical(area.product_tmpl_id.name)
+                _logger.critical(area.product_qty)
+                for linea_bom in area.bom_line_ids:
+                    _logger.critical("------------- BOM LINE -----------")
+                    _logger.warning(linea_bom.product_tmpl_id.name)
+                    _logger.warning(linea_bom.product_qty)
+                    # _logger.warning("template product: " + str(type(linea_bom.product_tmpl_id)))
+                    # _logger.warning("template product: " + str(type(self.areas_asociadas_sede.product_tmpl_id)))
+                    # _logger.warning("product_id: " + str(type(linea_bom.product_id)))
+                    # _logger.warning("product_id: " + str(type(self.areas_asociadas_sede.product_id)))
+                    # _logger.warning("product_qty: " + str(type(linea_bom.product_qty)))
+
+                    #self.areas_asociadas_sede += self.env['mrp.bom.line'].create(linea_bom)
+                    #producto_duplicado =
+                    # self.areas_asociadas_sede += self.env['mrp.bom.line'].create(
+                    #         {
+                    #             'product_tmpl_id': linea_bom.product_tmpl_id,
+                    #             'product_id': linea_bom.product_id,
+                    #             'product_qty': linea_bom.product_qty,
+                    #         }
+                    #     )
+                #self.areas_asociadas_sede += area.bom_line_ids
+                self.areas_asociadas_sede |= area.bom_line_ids
+                #self.areas_asociadas_sede = [(0,0,area.bom_line_ids)]
+                #self.areas_asociadas_sede = [(4,id,area.bom_line_ids)]
+                #self.areas_asociadas_sede = [(6,0,area.bom_line_ids)]
+                    #self.areas_asociadas_sede = (0,0,linea_bom)
+                #self.areas_asociadas_sede = vals['area.bom_line_ids'][0][2]
+                #self.areas_asociadas_sede = vals['area.bom_line_ids'][0][2]
+
+
+        for linea_bom in self.areas_asociadas_sede:
+            linea_bom.product_qty = 1
+
+        warning = {
+            'title': "Sede Seleccionada PRINT: {}".format(
+                self.sedes_seleccionadas
+            ),
+            'message': "objeto búsqueda: {}".format(
+                objetoBusqueda
+            ),
+        }
+        res.update({'warning': warning})
+
+
+    def action_validar_proyecto(self):
+        self.state = 'confirmed'
+        _logger.critical("Validar proyecto")
+        return True
 
     def action_confirmar_proyecto(self):
-        print("Confirmar proyecto")
+        self.state = 'draft'
+        _logger.critical("Confirmar proyecto")
         return True
 
 
+# TODO: Crear campo adicional en modelo bom_line para que me permita
+#  añadir la cantidad sin modificar nada de los productos asociados.
 
-
+# class MrpBomLineK(models.Model):
+#     _name = 'keralty_module.bom_line'
+#     _rec_name = "product_id"
+#     _description = 'Bill of Material Line Keralty'
+#
+#     product_id = fields.Many2one( 'product.product', 'Área', required=True, check_company=True)
+#     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id', readonly=False)
+#     product_qty = fields.Float(
+#         'Quantity', default=1.0,
+#         digits='Product Unit of Measure', required=True)
+#     company_id = fields.Many2one(
+#         related='bom_id.company_id', store=True, index=True, readonly=True)
+#     bom_id = fields.Many2one(
+#         'mrp.bom', 'Parent BoM',
+#         index=True, ondelete='cascade', required=True)
+#     parent_product_tmpl_id = fields.Many2one('product.template', 'Parent Product Template', related='bom_id.product_tmpl_id')
 
 
 class FormularioValidacion(models.Model):
@@ -123,7 +253,6 @@ class Calculos(models.Model):
 
     @api.onchange('fuente_criterio')
     def _onchange_fuente_criterio(self):
-        res = {}
         if self.fuente_criterio == "predeterminado":
             self.area_criterio_independiente = None
             self.campo_criterio_independiente = None

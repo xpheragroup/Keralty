@@ -203,45 +203,55 @@
         <field name="model">keralty_module.formulario.cliente</field>
         <field name="arch" type="xml">
             <form string="Formulario Cliente" class="o_purchase_order">
-            <header>
-                <button name="action_confirmar_proyecto" string="Validar Datos" type="object" class="oe_highlight" groups="base.group_user"/>
-                <button name="action_confirmar_proyecto" string="Confirmar Proyecto" type="object"
-                    confirm="Esta opción es irreversible y deshabilitará la edición del formulario. ¿Desea continuar?" groups="base.group_user" />
-            </header>
-            <sheet>
-                <div class="oe_title">
-                    <img src="/keralty_module/static/src/img/keralty_logo.svg" width="150px" height="100px" alt="Logo Keralty"/>
-                    <!-- <span class="o_form_label">Título Formulario Parametrización </span> -->
-                    <h1><field name="nombre_proyecto" class="oe_inline" placeholder="Nombre Proyecto"/></h1>
-
-                    <span class="o_form_label">Ingrese la cantidad de espacios a solicitar por cada una de las áreas que se presentan a continuación:</span>
-                </div>
-                <group string="Empresas">
-                    <group>
-                        <field name="sede"  widget="many2many_tags" options="{'no_open': False}" />
-                    </group>
-                    <group></group>
-                </group>
-                <group string="Ocupación Centro Médico">
-                    <h2><field name="numero_usuarios" class="oe_inline" placeholder="Número de Usuarios" widget="char" /><span class="fa fa-male oe_edit_only"/></h2>
-                    <h2><field name="numero_empleados" class="oe_inline" placeholder="Número de Empleados" widget="char" /><span class="fa fa-male oe_edit_only"/></h2>
-                    <h2><field name="terceros" class="oe_inline" placeholder="Terceros" widget="char"/><span class="fa fa-male oe_edit_only"/></h2>
-                </group>
-
-                <notebook>
-                    <page class="oe_highlight" string="ÁREAS CLIENTE">
-                        <group class="invoice-residual-view">
-                            <!--field name="move_raw_ids"/-->
+                <header>
+                    <button name="action_validar_proyecto" string="Validar Datos" type="object" class="oe_highlight" groups="base.group_user"/>
+                    <button name="action_confirmar_proyecto" string="Confirmar Proyecto" type="object"
+                        confirm="Esta opción es irreversible y deshabilitará la edición del formulario. ¿Desea continuar?" groups="base.group_user" />
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <img src="/keralty_module/static/src/img/keralty_logo.svg" width="150px" height="100px" alt="Logo Keralty"/>
+                        <!-- <span class="o_form_label">Título Formulario Parametrización </span> -->
+                        <h1><field name="nombre_proyecto" class="oe_inline" placeholder="Nombre Proyecto"/></h1>
+                    </div>
+                    <group string="Empresas">
+                        <span class="oe_inline">Seleccione la información que se presenta a continuación:</span>
+                        <br/>
+                        <group>
+                            <field name="empresa_seleccionada" string="Selección de Empresa(s)" widget="many2many_tags"/>
+                            <field name="producto_seleccionado" string="Selección de Producto(s)" widget="many2many_tags"/>
+                            <field name="sede_seleccionada" string="Selección de Sedes(s)" widget="many2many_tags"/>
+                            <field name="tipo_intervencion" />
                         </group>
-                    </page>
-                    <!--page style="background: green;" string="ÁREAS ">
-                    </page>
-                    <page class="oe_highlight" string="ÁREAS ADMINISTRATIVAS">
-                    </page>
-                    <page string="LABORATORIOS">
-                    </page-->
-                </notebook>
-            </sheet>
+                        <group></group>
+                    </group>
+                    <group string="Ocupación Centro Médico">
+                        <span class="oe_inline">Ingrese la cantidad máxima esperada al mismo tiempo para cada una de las categorías indicadas a continuación:</span>
+                        <br/>
+                        <h2><field name="numero_usuarios" class="oe_inline" placeholder="Número de Usuarios" widget="char" /><span class="fa fa-male "/></h2>
+                        <h2><field name="numero_empleados" class="oe_inline" placeholder="Número de Empleados" widget="char" /><span class="fa fa-male "/></h2>
+                        <h2><field name="terceros" class="oe_inline" placeholder="Terceros" widget="char"/><span class="fa fa-male "/></h2>
+                    </group>
+                    <notebook>
+                        <!--<templates>-->
+                            <!--<t t-foreach="empresa_seleccionada" t-as="empresa">-->
+                                <page class="oe_highlight" string="Áreas Cliente" name  ="Áreas Cliente">
+                                    <group class="invoice-residual-view">
+                                        <!--field name="move_raw_ids"/-->
+                                        <field name="areas_asociadas_sede" widget="many2many">
+                                            <tree string="Áreas" editable="top" create="true" edit="false">
+                                                <field name="company_id" invisible="1"/>
+                                                <field name="product_id" string="Área"/>
+                                                <field name="product_qty" />
+                                            </tree>
+                                        </field>
+                                    </group>
+                                </page>
+                            <!--</t>-->
+                        <!--</templates>-->
+                    </notebook>
+                </sheet>
             </form>
         </field>
     </record>
