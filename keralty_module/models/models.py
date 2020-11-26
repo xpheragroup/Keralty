@@ -41,8 +41,7 @@ class FormularioCliente(models.Model):
     _rec_name = 'nombre_proyecto'
 
     #
-    nombre_proyecto = fields.Char(required=True, string="Nombre Proyecto",
-                                  readonly=True, states={'draft': [('readonly', False)]},)
+    nombre_proyecto = fields.Char(required=True, string="Nombre Proyecto",)
     # Configuración empresa
     empresa_seleccionada = fields.Many2many(string="Selección de Empresa(s)",
                     comodel_name='product.attribute.value',
@@ -90,7 +89,7 @@ class FormularioCliente(models.Model):
                     column1="product_id",
                     column2="product_qty",
                     help="Selección de Áreas asociadas a la(s) Sede(s) seleccionada(s).",
-                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.name','ilike',empresa_seleccionada),('product_id.name','ilike',producto_seleccionado)]",
+                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
                     required=True,
                     copy=True,
                     readonly=True, states={'draft': [('readonly', False)]},)
@@ -134,11 +133,11 @@ class FormularioCliente(models.Model):
                     _logger.critical("------------- BOM LINE -----------")
                     _logger.warning(linea_bom.product_tmpl_id.name)
                     _logger.warning(linea_bom.product_qty)
-                #self.areas_asociadas_sede |= area.bom_line_ids
+                self.areas_asociadas_sede |= area.bom_line_ids
 
 
-        #for linea_bom in self.areas_asociadas_sede:
-        #    linea_bom.product_qty = 1
+        for linea_bom in self.areas_asociadas_sede:
+            linea_bom.product_qty = 1
 
         warning = {
             'title': "Sede Seleccionada PRINT: {}".format(
