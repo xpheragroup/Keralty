@@ -204,8 +204,8 @@
         <field name="arch" type="xml">
             <form string="Formulario Cliente" class="o_purchase_order">
                 <header>
-                    <button name="action_validar_proyecto" string="Validar Datos" type="object" class="oe_highlight" groups="base.group_user"/>
-                    <button name="action_confirmar_proyecto" string="Confirmar Proyecto" type="object"
+                    <!--button name="action_validar_proyecto" string="Validar Datos" type="object" class="oe_highlight" groups="base.group_user"/-->
+                    <button name="action_confirmar_proyecto" string="Confirmar Proyecto" type="object" class="oe_highlight"
                         confirm="Esta opción es irreversible y deshabilitará la edición del formulario. ¿Desea continuar?" groups="base.group_user" />
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
                 </header>
@@ -229,9 +229,9 @@
                     <group string="Ocupación Centro Médico">
                         <span class="oe_inline">Ingrese la cantidad máxima esperada al mismo tiempo para cada una de las categorías indicadas a continuación:</span>
                         <br/>
-                        <h2><field name="numero_usuarios" class="oe_inline" placeholder="Número de Usuarios" widget="char" /><span class="fa fa-male "/></h2>
-                        <h2><field name="numero_empleados" class="oe_inline" placeholder="Número de Empleados" widget="char" /><span class="fa fa-male "/></h2>
-                        <h2><field name="terceros" class="oe_inline" placeholder="Terceros" widget="char"/><span class="fa fa-male "/></h2>
+                        <h2><field name="numero_usuarios" class="oe_inline" placeholder="Número de Usuarios" /><span class="fa fa-male "/></h2>
+                        <h2><field name="numero_empleados" class="oe_inline" placeholder="Número de Empleados" /><span class="fa fa-male "/></h2>
+                        <h2><field name="terceros" class="oe_inline" placeholder="Terceros"/><span class="fa fa-male "/></h2>
                     </group>
                     <notebook>
                         <!--<templates>-->

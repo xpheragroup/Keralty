@@ -41,30 +41,38 @@ class FormularioCliente(models.Model):
     _rec_name = 'nombre_proyecto'
 
     #
-    nombre_proyecto = fields.Char(required=True, string="Nombre Proyecto")
+    nombre_proyecto = fields.Char(required=True, string="Nombre Proyecto",
+                                  readonly=True, states={'draft': [('readonly', False)]},)
     # Configuración empresa
     empresa_seleccionada = fields.Many2many(string="Selección de Empresa(s)",
                     comodel_name='product.attribute.value',
                     relation="product_cliente_empresa",
                     help="Selección de Empresas asociadas a la solicitud.",
                     domain="[['attribute_id.name','ilike','Empresa']]",
-                    required=True)
+                    required=True,
+                    readonly=True, states={'draft': [('readonly', False)]},)
     producto_seleccionado = fields.Many2many(string="Selección de Producto(s)",
                     comodel_name='product.attribute.value',
                     relation="product_cliente_producto",
                     help="Selección de Productos asociados a la solicitud.",
                     domain="[['attribute_id.name','ilike','Producto']]",
-                    required=True)
+                    required=True,
+                    readonly=True, states={'draft': [('readonly', False)]},)
     sede_seleccionada = fields.Many2many(string="Selección de Sede(s)",
                     comodel_name='product.template',
                     help="Selección de Sede(s) asociadas a la solicitud.",
                     domain="[('categ_id.name','ilike','Sede')]",
-                    required=True)
-    tipo_intervencion = fields.Selection([('sede_nueva', 'Sede Nueva'),('adecuacion', 'Adecuación'),('remodelacion', 'Remodelación'),('ampliacion', 'Ampliación')])
+                    required=True,
+                    readonly=True, states={'draft': [('readonly', False)]},)
+    tipo_intervencion = fields.Selection([('sede_nueva', 'Sede Nueva'),('adecuacion', 'Adecuación'),('remodelacion', 'Remodelación'),('ampliacion', 'Ampliación')],
+                    readonly=True, states={'draft': [('readonly', False)]},)
     # Ocupación centro médico
-    numero_usuarios = fields.Float(string="Número de Usuarios", required=True, help="Número de Usuarios")
-    numero_empleados = fields.Float(string="Número de Empleados", required=True, help="Número de Empleados")
-    terceros = fields.Float(string="Terceros", required=True, help="Terceros")
+    numero_usuarios = fields.Float(string="Número de Usuarios", required=True, help="Número de Usuarios",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    numero_empleados = fields.Float(string="Número de Empleados", required=True, help="Número de Empleados",
+                                    readonly=True, states={'draft': [('readonly', False)]},)
+    terceros = fields.Float(string="Terceros", required=True, help="Terceros",
+                    readonly=True, states={'draft': [('readonly', False)]},)
 
     # Listado de áreas asociadas en campo BoM de mrp.production
     sedes_seleccionadas = fields.Many2many(string="Selección de Sede(s)",
@@ -72,18 +80,20 @@ class FormularioCliente(models.Model):
                     relation="bom_cliente_sedes",
                     help="Selección de Sedes asociados a la solicitud.",
                     domain="[('product_tmpl_id','=',sede_seleccionada)]",
-                    required=True)
+                    required=True,
+                    readonly=True, states={'draft': [('readonly', False)]},)
     # TODO: encontrar el filtro necesario por cada una de las variantes E,mpresa y Producto, por lo pronto se dejan solamente las SEDES.
     # TODO: Al momento de editar cada línea no afecte la cantidad preconfigurada
     areas_asociadas_sede = fields.Many2many(string="Selección de Áreas",
                     comodel_name='mrp.bom.line',
-                    relation="bom_line_cliente_areas_asistenciales",
+                    relation="x_bom_line_cliente_areas_asistenciales",
                     column1="product_id",
                     column2="product_qty",
                     help="Selección de Áreas asociadas a la(s) Sede(s) seleccionada(s).",
-                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
+                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.name','ilike',empresa_seleccionada),('product_id.name','ilike',producto_seleccionado)]",
                     required=True,
-                    copy=False)
+                    copy=True,
+                    readonly=True, states={'draft': [('readonly', False)]},)
 
     # Sistema de Estados
     state = fields.Selection([
@@ -92,11 +102,15 @@ class FormularioCliente(models.Model):
         ('done', 'Hecho'),
         ('cancel', 'Cancelado')], string='Estado',
         copy=False, index=True, readonly=True,
-        store=True, tracking=True,
-        help=" * Borrador: El poryecto se encuentra en edición.\n"
+        store=True, tracking=True, compute='_compute_state', default='draft',
+        help=" * Borrador: El proyecto se encuentra en edición.\n"
              " * Confirmado: El proyecto ha sido confirmado y no es editable por el cliente.\n"
              " * Hecho: El proyecto se ha ejecutado. \n"
              " * Cancelado: El proyecto ha sido cancelado.")
+
+    def _compute_state(self):
+        if not self.state:
+            self.state = 'draft'
 
     #
     '''
@@ -120,33 +134,11 @@ class FormularioCliente(models.Model):
                     _logger.critical("------------- BOM LINE -----------")
                     _logger.warning(linea_bom.product_tmpl_id.name)
                     _logger.warning(linea_bom.product_qty)
-                    # _logger.warning("template product: " + str(type(linea_bom.product_tmpl_id)))
-                    # _logger.warning("template product: " + str(type(self.areas_asociadas_sede.product_tmpl_id)))
-                    # _logger.warning("product_id: " + str(type(linea_bom.product_id)))
-                    # _logger.warning("product_id: " + str(type(self.areas_asociadas_sede.product_id)))
-                    # _logger.warning("product_qty: " + str(type(linea_bom.product_qty)))
-
-                    #self.areas_asociadas_sede += self.env['mrp.bom.line'].create(linea_bom)
-                    #producto_duplicado =
-                    # self.areas_asociadas_sede += self.env['mrp.bom.line'].create(
-                    #         {
-                    #             'product_tmpl_id': linea_bom.product_tmpl_id,
-                    #             'product_id': linea_bom.product_id,
-                    #             'product_qty': linea_bom.product_qty,
-                    #         }
-                    #     )
-                #self.areas_asociadas_sede += area.bom_line_ids
-                self.areas_asociadas_sede |= area.bom_line_ids
-                #self.areas_asociadas_sede = [(0,0,area.bom_line_ids)]
-                #self.areas_asociadas_sede = [(4,id,area.bom_line_ids)]
-                #self.areas_asociadas_sede = [(6,0,area.bom_line_ids)]
-                    #self.areas_asociadas_sede = (0,0,linea_bom)
-                #self.areas_asociadas_sede = vals['area.bom_line_ids'][0][2]
-                #self.areas_asociadas_sede = vals['area.bom_line_ids'][0][2]
+                #self.areas_asociadas_sede |= area.bom_line_ids
 
 
-        for linea_bom in self.areas_asociadas_sede:
-            linea_bom.product_qty = 1
+        #for linea_bom in self.areas_asociadas_sede:
+        #    linea_bom.product_qty = 1
 
         warning = {
             'title': "Sede Seleccionada PRINT: {}".format(
@@ -160,18 +152,34 @@ class FormularioCliente(models.Model):
 
 
     def action_validar_proyecto(self):
-        self.state = 'confirmed'
+        self.state = 'draft'
         _logger.critical("Validar proyecto")
         return True
 
     def action_confirmar_proyecto(self):
-        self.state = 'draft'
+        self.state = 'confirmed'
         _logger.critical("Confirmar proyecto")
         return True
 
 
+class MrpBom(models.Model):
+    """ Defines bills of material for a product or a product template """
+    _name = 'mrp.bom'
+    _inherit = 'mrp.bom'
+    bom_line_ids = fields.One2many(copy=False)
+
 # TODO: Crear campo adicional en modelo bom_line para que me permita
 #  añadir la cantidad sin modificar nada de los productos asociados.
+# class Area(models.Model):
+#     _name = 'keralty_module.area'
+#     _rec_name = "product_id"
+#     _description = 'Área'
+#
+#     product_id = fields.Many2one('product.product', 'Área', required=True)
+#     product_tmpl_id = fields.Many2one('product.template', 'Área Template', related='product_id.product_tmpl_id', readonly=False)
+#     product_qty = fields.Float(
+#         'Quantity', default=1.0,
+#         digits='Cantidad Unidades', required=True)
 
 # class MrpBomLineK(models.Model):
 #     _name = 'keralty_module.bom_line'
