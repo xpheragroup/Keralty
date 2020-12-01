@@ -53,7 +53,7 @@
       <field name="view_mode">tree,pivot,graph,form,kanban</field>
       <field name="help" type="html">
           <p class="oe_view_nocontent_create">
-              No hay ningún formulario DE VALIDACIÓN creado aún.
+              No hay ningún formulario de validación creado aún.
           </p>
       </field>
     </record>
@@ -283,6 +283,75 @@
                     </group>
                 </group>
             </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- FORMULARIO DE VALIDACIÓN TÉCNICA -->
+    <record id="keralty_formulario_validacion_form" model="ir.ui.view">
+        <field name="name">Formulario de Validación Técnica</field>
+        <field name="model">keralty_module.formulario.validacion</field>
+        <field name="arch" type="xml">
+            <form string="Formulario de Validación Técnica" class="o_purchase_order">
+                <header>
+                    <button name="action_calcular_areas" string="Calcular Áreas" type="object" class="oe_highlight"
+                        confirm="Realizando el cálculo de áreas." groups="base.group_user" />
+                    <button name="action_realizar" string="Marcar Realizado" type="object" class="oe_highlight"
+                        confirm="Esta opción es irreversible y deshabilitará la edición del formulario. ¿Desea continuar?" groups="base.group_user" />
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <img src="/keralty_module/static/src/img/keralty_logo.svg" width="150px" height="100px" alt="Logo Keralty"/>
+                        <h2><field name="nombre_tecnico" class="oe_inline" placeholder="Código Revisión"/></h2>
+                        <br/>
+                        <span class="o_form_label">Ingrese la información solicitada para realizar la validación técnica de un proyecto:</span>
+                    </div>
+                    <group string="Datos del proyecto">
+                        <group>
+                            <field name="formulario_cliente" ></field>
+                        </group>
+                        <group>
+
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page class="oe_highlight" string="Áreas Cliente" name="Áreas Cliente">
+                            <group class="invoice-residual-view">
+                                <field name="areas_cliente" widget="many2many">
+                                    <tree string="Áreas" editable="top">
+                                        <field name="company_id" invisible="1"/>
+                                        <field name="product_id" string="Área"/>
+                                        <field name="product_qty" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page class="oe_highlight" string="Áreas Derivadas" name="Áreas Derivadas">
+                            <group class="invoice-residual-view">
+                                <field name="areas_derivadas" widget="many2many">
+                                    <tree string="Áreas" editable="top">
+                                        <field name="company_id" invisible="1"/>
+                                        <field name="product_tmpl_id" string="Área"/>
+                                        <field name="product_qty" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                        <page class="oe_highlight" string="Áreas Diseño" name="Áreas Diseño">
+                            <group class="invoice-residual-view">
+                                <field name="areas_diseño" widget="many2many">
+                                    <tree string="Áreas" editable="top">
+                                        <field name="company_id" invisible="1"/>
+                                        <field name="product_tmpl_id" string="Área"/>
+                                        <field name="product_qty" />
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
             </form>
         </field>
     </record>

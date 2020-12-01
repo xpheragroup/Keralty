@@ -98,15 +98,16 @@ class FormularioCliente(models.Model):
     state = fields.Selection([
         ('draft', 'Borrador'),
         ('confirmed', 'Confirmado'),
-        ('done', 'Hecho'),
+        ('done', 'Realizado'),
         ('cancel', 'Cancelado')], string='Estado',
         copy=False, index=True, readonly=True,
         store=True, tracking=True, compute='_compute_state', default='draft',
         help=" * Borrador: El proyecto se encuentra en edición.\n"
              " * Confirmado: El proyecto ha sido confirmado y no es editable por el cliente.\n"
-             " * Hecho: El proyecto se ha ejecutado. \n"
+             " * Realizado: El proyecto se ha ejecutado. \n"
              " * Cancelado: El proyecto ha sido cancelado.")
 
+    @api.depends('state')
     def _compute_state(self):
         if not self.state:
             self.state = 'draft'
@@ -200,14 +201,107 @@ class MrpBom(models.Model):
 
 class FormularioValidacion(models.Model):
     _name = 'keralty_module.formulario.validacion'
-    _description = 'Formulario Validacion'
+    _description = 'Formulario Validación Técnica'
     _rec_name = 'nombre_tecnico'
 
-    nombre_tecnico = fields.Char(required=True, string="Nombre Proyecto")
-    descripcion = fields.Char(required=True, string="Descripcion")
-    formulario_cliente = fields.Many2one(string="Formulario Cliente", comodel_name='keralty_module.formulario.cliente',
-                    help="Formulario Cliente asociado para validacion tecnica.")
+    nombre_tecnico = fields.Char(required=True, string="Código Revisión")
+    formulario_cliente = fields.Many2one(string="Formulario Cliente",
+                                comodel_name='keralty_module.formulario.cliente',
+                                help="Formulario Cliente asociado para validación técnica.")
 
+    areas_cliente = fields.Many2many(string="Áreas Cliente",
+                    comodel_name='mrp.bom.line',
+                    relation="validacion_areas_cliente",
+                    column1="product_id",
+                    column2="product_qty",
+                    help="Listado de áreas solicitadas por el cliente.",
+                    #domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
+                    required=True,
+                    copy=True,)
+                    #compute='_compute_areas_cliente',)
+                    # readonly=True, states={'draft': [('readonly', False)]},)
+
+    areas_derivadas = fields.Many2many(string="Áreas Derivadas",
+                    comodel_name='mrp.bom',
+                    relation="validacion_areas_derivadas",
+                    # column1="product_id",
+                    # column2="product_qty",
+                    help="Listado de áreas derivadas de la solicitud del cliente.",
+                    domain="[('product_tmpl_id.categ_id.name','ilike','Derivada')]",
+                    #domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
+                    required=True,
+                    copy=True,)
+                    #compute='_compute_areas_cliente',)
+                    #readonly=True, states={'draft': [('readonly', False)]},)
+
+    areas_diseño = fields.Many2many(string="Áreas Diseño",
+                    comodel_name='mrp.bom',
+                    relation="validacion_areas_diseno",
+                    # column1="product_id",
+                    # column2="product_qty",
+                    help="Listado de áreas de diseño de la solicitud del cliente.",
+                    domain="[('product_tmpl_id.categ_id.name','ilike','Diseño')]",
+                    #domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
+                    required=True,
+                    copy=True,)
+                    #compute='_compute_areas_cliente',)
+                    #readonly=True, states={'draft': [('readonly', False)]},)
+
+    # Sistema de Estados
+    state = fields.Selection([
+        ('draft', 'Borrador'),
+        ('confirmed', 'Confirmado'),
+        ('done', 'Realizado'),
+        ('cancel', 'Cancelado')], string='Estado',
+        copy=False, index=True, readonly=True,
+        store=True, tracking=True, compute='_compute_state', default='draft',
+        help=" * Borrador: El proyecto se encuentra en edición.\n"
+             " * Confirmado: El proyecto ha sido confirmado y no es editable por el cliente.\n"
+             " * Realizado: El proyecto se ha ejecutado. \n"
+             " * Cancelado: El proyecto ha sido cancelado.")
+
+
+    '''
+        Copia LdM
+        Cuando cambia la sede seleccionada copia la lista de materiales (LdM) de la Sede (product)
+        y la muestra en el campo areas_asociadas_sede     
+    '''
+    @api.onchange('formulario_cliente')
+    def _onchange_formulario_cliente(self):
+        res = {}
+        objetoBusqueda = None
+        _logger.critical(self.formulario_cliente.areas_asociadas_sede)
+        if self.formulario_cliente.areas_asociadas_sede:
+            self.areas_cliente = self.formulario_cliente.areas_asociadas_sede
+
+        warning = {
+            'title': "Sede Seleccionada PRINT: {}".format(
+                self.areas_cliente
+            ),
+            'message': "objeto búsqueda: {}".format(
+                objetoBusqueda
+            ),
+        }
+        res.update({'warning': warning})
+
+
+    def action_realizar(self):
+        self.state = 'done'
+        _logger.critical("Realizar proyecto")
+        return True
+
+    def action_calcular_areas(self):
+        _logger.critical("Calcular Áreas")
+        return True
+
+    @api.depends('areas_cliente','areas_derivadas','areas_diseño')
+    def _compute_areas_cliente(self):
+
+        for line in self:
+            line.areas_cliente = line.areas_cliente
+
+            line.areas_derivadas = line.areas_derivadas
+            line.areas_diseño = line.areas_diseño
 # hereda de producto y añade campo para relación con Categoría
 # class ProductProduct(models.Model):
 #     _inherit = 'product.product'
