@@ -166,7 +166,32 @@ class MrpBom(models.Model):
     """ Defines bills of material for a product or a product template """
     _name = 'mrp.bom'
     _inherit = 'mrp.bom'
-    bom_line_ids = fields.One2many(copy=False)
+
+    # M2 Utilizados para áreas cliente, derivadas, y diseño. Cada una contempla un cálculo diferente asignado a la misma variable
+    m2 = fields.Float('M2', default=1.0)
+    total_m2 = fields.Float('Total', default=1.0, digits=(16, 2), readonly=True, group_operator="sum",
+                            compute='_compute_total_m2',)
+
+    @api.depends('m2','total_m2')
+    def _compute_total_m2(self):
+        for record in self:
+            # _logger.critical(" COMPUTE TOTAL_M2 ")
+            record.total_m2 = record.product_qty * record.m2
+
+class MrpBomLine(models.Model):
+    _name = 'mrp.bom.line'
+    _inherit = 'mrp.bom.line'
+
+    # M2 Utilizados para áreas cliente, derivadas, y diseño. Cada una contempla un cálculo diferente asignado a la misma variable
+    m2 = fields.Float('M2', default=1.0)
+    total_m2 = fields.Float('Total', default=1.0, digits=(16, 2), readonly=True, group_operator="sum",
+                            compute='_compute_total_m2',)
+
+    @api.depends('m2','total_m2')
+    def _compute_total_m2(self):
+        for record in self:
+            # _logger.critical(" COMPUTE TOTAL_M2 ")
+            record.total_m2 = record.product_qty * record.m2
 
 # TODO: Crear campo adicional en modelo bom_line para que me permita
 #  añadir la cantidad sin modificar nada de los productos asociados.
@@ -247,6 +272,10 @@ class FormularioValidacion(models.Model):
                     #compute='_compute_areas_cliente',)
                     #readonly=True, states={'draft': [('readonly', False)]},)
 
+    porcentaje_pasillos = fields.Float('Porcentaje de pasillos y muros adicionales', default=30.0)
+    total_m2_areas = fields.Float('Total M2 proyecto', default=1.0, digits=(16, 2), readonly=True, group_operator="sum")
+
+
     # Sistema de Estados
     state = fields.Selection([
         ('draft', 'Borrador'),
@@ -292,6 +321,110 @@ class FormularioValidacion(models.Model):
 
     def action_calcular_areas(self):
         _logger.critical("Calcular Áreas")
+        self.total_m2_areas = 0
+        '''
+            TODO: 
+                PRE: 
+                    Crear campos M2 Parametrizados y Total para áreas cliente
+                                  M2 Calculados y Total para áreas derivadas
+                                  M2 Sugeridos y Total para áreas de diseño
+                                  Porcentaje de pasillos y muros adicionales
+                                  Total para Formulario de Validación Técnica que realice la sumatoria de cada sección de áreas...
+                ÁREAS CLIENTE                                  
+                    1 Consultar M2 asociados a un área seleccionada (producto)
+                    2 Calcular el total de metros cuadrados para área cliente utilizando el valor consultado
+                ÁREAS DERIVADAS
+                    1 Consultar la fórmula para el área derivada seleccionada desde el formulario de parametrización de cálculos
+                    2 Calcular el total m2 del área derivada utilizando la fórmula consultada.
+                ÁREAS DISEÑO
+                    1 Consultar M2 asociados a un área de diseño o dejar campo en blanco
+                    2 Calcular el total de M2 utilizando el valor ingresado/consultado
+                
+                CÁLCULO TOTAL DE ÁREAS (SUMATORIA) y porcentaje pasillos.
+                    Mostrar total
+                
+                POST: 
+                    Crear restricción en edición para cammpos M2 y Total para las áreas de cliente y las áreas derivadas (validar)
+            
+        '''
+        for area_ciente in self.areas_cliente:
+            # _logger.warning(area_ciente.product_id.name)
+            for child_bom in area_ciente.child_line_ids:
+                _logger.critical(child_bom.product_id.name)
+                # str.find("soccer")
+                # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
+                if "Área" in child_bom.product_id.name:
+                    # _logger.critical(child_bom.product_qty)
+                    area_ciente.m2 = child_bom.product_qty
+                    self.total_m2_areas += area_ciente.m2 * area_ciente.product_qty # child_bom.total_m2
+                    _logger.critical("ÁREAS CLIENTES -> TOTAL_M2: " + str(self.total_m2_areas))
+
+                    # _logger.critical(" CALC TOTAL_M2 ")
+                    # area_ciente.total_m2 = area_ciente.product_qty * area_ciente.m2
+
+        for area_derivada in self.areas_derivadas:
+            _logger.warning(area_derivada.display_name)
+            for bom_line in area_derivada.bom_line_ids:
+                # _logger.critical(bom_line.product_id.name)
+                # for child_bom in bom_line.child_line_ids:
+                # _logger.critical(child_bom.product_id.name)
+                # str.find("soccer")
+                # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
+                if "Área" in bom_line.product_id.name:
+                    # _logger.critical(child_bom.product_qty)
+                    area_derivada.m2 = bom_line.product_qty
+                    self.total_m2_areas += area_derivada.m2 * area_derivada.product_qty # bom_line.total_m2
+                    _logger.critical("ÁREAS DERIVADAS -> TOTAL_M2: " + str(self.total_m2_areas))
+
+            # Consultar si el área derivada tiene formulación creada
+            encuentra_formula_area = self.env['keralty_module.calculos'].search([('area_derivada.name', '=', area_derivada.display_name)], order='id asc')
+            _logger.critical(encuentra_formula_area.formula_aritmetica)
+
+            if encuentra_formula_area.variable_derivada == 'cantidad':
+                # Para calcular la cantidad se debe utilizar la fórmula aritmética configurada
+                # Si se utiliza la fuente de criterio = formulario debo extraer el área o campo independiente
+                if encuentra_formula_area.fuente_criterio == 'formulario':
+                    # _logger.critical(" FORMULA ES FORMULARIO ")
+                    if encuentra_formula_area.area_criterio_independiente:
+                        # _logger.critical(" TIENE ÁREA COMO CRITERIO INDEPENDIENTE ")
+                        for areas_formulario in self.areas_cliente:
+                            _logger.critical(areas_formulario)
+                            if encuentra_formula_area.area_criterio_independiente.name in areas_formulario.product_id.name:
+                                # _logger.critical(" ENCUENTRA ÁREA CRITERIO ")
+                                # TODO: Utilizar formula configurada
+                                area_derivada.product_qty = areas_formulario.product_qty / 7
+                                # self.total_m2_areas += areas_formulario.total_m2
+
+                                _logger.critical("ÁREAS DERIVADAS FORMULAS -> TOTAL_M2: " + str(self.total_m2_areas))
+
+                    # TODO: Consultar valor del campo_criterio y asignarlo
+                    # if encuentra_formula_area.campo_criterio_independiente:
+                        # self.formulario_cliente
+                    # area_derivada.product_qty = 9999
+                    # ecuentra_formula_area.formula_aritmetica
+                    #
+                    # _logger.critical(" CALC TOTAL_M2 ")
+                    # area_ciente.total_m2 = area_derivada.product_qty * area_ciente.m2
+
+        for area_diseño in self.areas_diseño:
+            # _logger.warning(area_derivada.bom_line_ids)
+            for bom_line in area_diseño.bom_line_ids:
+                # _logger.critical(bom_line.product_id.name)
+                # for child_bom in bom_line.child_line_ids:
+                # _logger.critical(child_bom.product_id.name)
+                # str.find("soccer")
+                # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
+                if "Área" in bom_line.product_id.name:
+                    # _logger.critical(child_bom.product_qty)
+                    area_diseño.m2 = bom_line.product_qty
+                    self.total_m2_areas += area_diseño.m2 * area_diseño.product_qty # bom_line.total_m2
+                    _logger.critical("ÁREAS DISEÑO -> TOTAL_M2: " + str(self.total_m2_areas))
+
+                    # _logger.critical(" CALC TOTAL_M2 ")
+                    # area_ciente.total_m2 = area_derivada.product_qty * area_ciente.m2
+
+        # TODO: Utilizar valor de pasillos...
+        # self.total_m2_areas =
         return True
 
     @api.depends('areas_cliente','areas_derivadas','areas_diseño')
@@ -348,8 +481,8 @@ class Calculos(models.Model):
                     domain="[('categ_id.name','ilike','Cliente')]")
     campo_criterio_independiente = fields.Many2one(string="Campo como criterio independiente", comodel_name='ir.model.fields',
                     help="Criterio a utilizar en el cálculo.",
-                    domain="[('model_id.model', 'ilike', 'formulario.cliente'), ('readonly', '=', False)]")
-    variable_criterio = fields.Selection([('predeterminado', 'Valor Predeterminado'),('formulario', 'Formulario de Cliente')])
+                    domain="[('model_id.model', 'ilike', 'formulario.cliente')]")
+    variable_criterio = fields.Selection([('area', 'Área'),('cantidad', 'Cantidad')])
     formula_aritmetica = fields.Char(required=True, string="Fórmula")
 
     @api.onchange('fuente_criterio')

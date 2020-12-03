@@ -324,6 +324,8 @@
                                         <field name="company_id" invisible="1"/>
                                         <field name="product_id" string="Área"/>
                                         <field name="product_qty" />
+                                        <field name="m2" />
+                                        <field name="total_m2" sum="Total" />
                                     </tree>
                                 </field>
                             </group>
@@ -335,6 +337,8 @@
                                         <field name="company_id" invisible="1"/>
                                         <field name="product_tmpl_id" string="Área"/>
                                         <field name="product_qty" />
+                                        <field name="m2" />
+                                        <field name="total_m2" sum="Total" />
                                     </tree>
                                 </field>
                             </group>
@@ -346,8 +350,18 @@
                                         <field name="company_id" invisible="1"/>
                                         <field name="product_tmpl_id" string="Área"/>
                                         <field name="product_qty" />
+                                        <field name="m2" />
+                                        <field name="total_m2" sum="Total" />
                                     </tree>
                                 </field>
+                            </group>
+                        </page>
+                        <page class="oe_highlight" string="Total" name="Total">
+                            <group class="invoice-residual-view">
+                                <group class="invoice-residual-view">
+                                    <field name="porcentaje_pasillos" />
+                                    <field name="total_m2_areas" />
+                                </group>
                             </group>
                         </page>
                     </notebook>
