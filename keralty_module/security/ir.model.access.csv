@@ -5,4 +5,3 @@ access_keralty_module_formulario_validacion,keralty_module.formulario.valdiacion
 access_keralty_module_categoria,keralty_module.categoria,model_keralty_module_categoria,mrp.group_mrp_user,1,1,1,1
 access_keralty_module_sede,keralty_module.sede,model_keralty_module_sede,mrp.group_mrp_user,1,1,1,1
 access_keralty_module_calculos,keralty_module.calculos,model_keralty_module_calculos,mrp.group_mrp_user,1,1,1,1
-keralty_module_form_cliente_action_window,keralty_module.menu_4,keralty_module.menu_4,mrp.group_mrp_user,1,1,1,1
