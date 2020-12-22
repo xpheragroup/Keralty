@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, exceptions
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -315,9 +315,238 @@ class FormularioValidacion(models.Model):
 
 
     def action_realizar(self):
-        self.state = 'done'
+        total_boom_line_ids = None
+
         _logger.critical("Realizar proyecto")
+        '''
+            TODO:
+                Traer todas las áreas diligenciadas del formulario de falicación
+                Copiar las áreas y crearlas en el módulo Inventario como productos y asociarles los materiales de construcción:
+                Jerarquía:
+                    Se copian áreas
+                    Se copian materiales de construcción
+                    
+        '''
+        if self.state != 'done':
+
+            Product = self.env['product.product']
+            BomLine = self.env['mrp.bom.line']
+
+            # Create Template Product
+            product_template = self.env['product.template'].create({
+                'name': self.nombre_tecnico,
+            })
+            # product = Product.create({
+            #             'name': self.nombre_tecnico,
+            #             # 'product_qty': area_derivada.product_qty,
+            #         })
+
+            # Create BOM
+            bom_created = self.env['mrp.bom'].create({
+                'product_tmpl_id': product_template.id,
+                'product_qty': 1.0,
+                'type': 'normal',
+                # 'bom_line_ids': [0, 0,
+                #                  total_boom_line_ids
+                #     ]
+                #     [
+                #     (0, 0, {
+                #         'product_id': product_A.id,
+                #         'product_qty': 1,
+                #         'bom_product_template_attribute_value_ids': [(4, sofa_red.id), (4, sofa_blue.id), (4, sofa_big.id)],
+                #     }),
+                #     (0, 0, {
+                #         'product_id': product_B.id,
+                #         'product_qty': 1,
+                #         'bom_product_template_attribute_value_ids': [(4, sofa_red.id), (4, sofa_blue.id)]
+                #     })
+                # ]
+            })
+
+            '''
+                DONE: Extraer el BomLine del producto del BOM de cada areas_derivadas y areas_diseño
+            '''
+            if total_boom_line_ids == None:
+                total_boom_line_ids = self.areas_cliente
+            else:
+                total_boom_line_ids += self.areas_cliente
+
+            _logger.critical("BOM: AREAS CLIENTE: ")
+            _logger.critical(self.areas_cliente)
+
+            for area_derivada in self.areas_derivadas:
+                # area_derivada.product_tmpl_id.bom_product_template_attribute_value_ids = None
+
+                # Create Product
+                _logger.critical("BOM: AREAS DERIVADAS: ")
+                _logger.critical(area_derivada)
+                _logger.critical(area_derivada.product_tmpl_id)
+                _logger.critical(area_derivada.product_id)
+                if total_boom_line_ids == None:
+                    total_boom_line_ids = area_derivada.bom_line_ids
+                else:
+                    total_boom_line_ids += area_derivada.bom_line_ids
+
+                # if area_derivada.product_id.name != None:
+                #
+                #     _logger.critical("Ok? crear producto")
+                #     product = Product.create({
+                #         'name': area_derivada.product_id.name,
+                #         # 'product_qty': area_derivada.product_qty,
+                #     })
+                #     _logger.critical("Ok? crear producto")
+                #
+                #     BomLine.create({
+                #         'bom_id': bom_created.id,  # BOM ASOCIADO
+                #         'product_id': product.id,
+                #         'product_qty': area_derivada.product_qty,
+                #     })
+
+            for area_diseño in self.areas_diseño:
+                # area_diseño.product_tmpl_id.bom_product_template_attribute_value_ids = None
+
+                # Create Product
+                _logger.critical("BOM: AREAS DISEÑO: ")
+                _logger.critical(area_diseño)
+                _logger.critical(area_diseño.product_tmpl_id)
+                _logger.critical(area_diseño.product_id)
+                if total_boom_line_ids == None:
+                    total_boom_line_ids = area_diseño.bom_line_ids
+                else:
+                    total_boom_line_ids += area_diseño.bom_line_ids
+
+                # if area_diseño.product_id.name != None:
+                #     product = Product.create({
+                #         'name': area_diseño.product_id.name,
+                #         # 'product_qty': area_diseño.product_qty,
+                #     })
+                #
+                #     BomLine.create({
+                #         'bom_id': bom_created.id,  # BOM ASOCIADO
+                #         'product_id': product.id,
+                #         'product_qty': area_diseño.product_qty,
+                #     })
+
+            for bom_without_attrs in total_boom_line_ids:
+                bom_without_attrs.bom_product_template_attribute_value_ids = None
+
+                BomLine.create({
+                    'bom_id': bom_created.id,
+                    'product_id': bom_without_attrs.product_id.id,
+                    'product_qty': bom_without_attrs.product_qty,
+                })
+
+            _logger.critical('-------------------------------')
+            _logger.critical('--------TOTAL BOM IDs----------')
+            _logger.critical('-------------------------------')
+            _logger.critical(total_boom_line_ids)
+            _logger.critical('-------------------------------')
+
+
+            self.state = 'done'
+        else:
+            raise exceptions.UserError("El proyecto ya ha sido marcado como realizado.")
+
         return True
+
+
+    def action_producir(self):
+
+        '''
+            TODO: Crear orden de producción de las sublistas de materiales, que contenga cada producto creado, dejar en estado borrador cada orden de producción creada.
+            La validación de los materiales de construcción la realizará el área de construcción y dotación para luego ser marcada como realizada la orden.
+
+            PRE: Revisar estructura de objeto mrp.production, traer la información de la creación del objeto
+                 Buscar el product.product creado y asignarlo a la creación del objeto mrp.production
+            1. Crear el objeto mrp.production y asignar los productos que se crearán
+            2. Asignar el estado borrador o draft a cada una de las ordenes de producción creadas.
+        '''
+        if self.state == 'done':
+
+            producto = self.env['product.product'].search([('name', '=', self.nombre_tecnico)], order='id asc')
+            product_template = self.env['product.template'].search([('name', '=', self.nombre_tecnico)], order='id asc')
+            bom_id = self.env['mrp.bom'].search([('product_tmpl_id', '=', product_template.id)], order='id asc')
+            _logger.critical('--------PRODUCTO ENCONTRADO----------')
+            _logger.critical(producto)
+            _logger.critical('--------BOM ID ENCONTRADO----------')
+            _logger.critical(bom_id)
+
+            # Obtener compañía:
+            company_id = self.env.company
+            if producto:
+                production_id = self.env['mrp.production'].create({
+                    'product_id': producto.id,
+                    'product_tmpl_id': producto.product_tmpl_id.id,
+                    'product_qty': 1,
+                    'product_uom_id': producto.uom_id.id,
+                    'company_id': company_id.id,
+                    'bom_id': bom_id.id,
+                    # 'move_raw_ids': bom.bom_line_id
+                })
+
+                production_id.product_qty = bom_id.product_qty
+                production_id.product_uom_id = bom_id.product_uom_id.id
+                production_id.move_raw_ids = [(2, move.id) for move in production_id.move_raw_ids.filtered(lambda x: not x.bom_line_id)]
+                # ////////////////////////////////
+                # for bom_line in bom_id:
+                #     # mo.move_raw_ids =
+                #     # ._generate_workorders(boms)
+                #     # move = production_id._generate_raw_move(bom_line, {'qty': bom_line.product_qty, 'parent_line': None})
+                #     production_id._generate_finished_moves()
+                #     production_id.move_raw_ids._adjust_procure_method()
+                #
+                #     # move = production_id._generate_workorders(bom_id)
+                #
+                #     _logger.critical('--------MOVE_RAW_IDs----------')
+                #     _logger.critical('------------------------------')
+                #     # _logger.critical(move)
+                #     _logger.critical('------------------------------')
+                #
+                #     production_id._adjust_procure_method()
+                #     move.action_confirm()
+                #     bom_line.unlink()
+                # mo.picking_type_id = bom_id.picking_type_id
+                _logger.critical('--------MOVE_RAW_IDs----------')
+                _logger.critical('------------------------------')
+                _logger.critical(production_id.move_raw_ids)
+                _logger.critical(production_id._onchange_move_raw())
+                _logger.critical(production_id._onchange_location())
+                # _logger.critical(production_id._get_moves_raw_values())
+                # _logger.critical(production_id.action_assign())
+                _logger.critical(production_id._get_moves_raw_values())
+                # _logger.critical(production_id.move_raw_ids._adjust_procure_method())
+                # _logger.critical(production_id.button_plan())
+                # _logger.critical(production_id._get_ready_to_produce_state())
+                _logger.critical(production_id._generate_finished_moves())
+                _logger.critical('------------------------------')
+
+                production_id._get_moves_raw_values()
+                production_id._generate_finished_moves()
+                production_id.move_raw_ids._adjust_procure_method()
+
+
+                # production_id.onchange_product_id()
+                # production_id._onchange_bom_id()
+
+                # with self.assertRaises(exceptions.UserError):
+                production_id.action_confirm()
+
+                _logger.critical('--------ORDEN PRODUCCIÓN----------')
+                _logger.critical('----------------------------------')
+                _logger.critical(production_id)
+                _logger.critical('----------------------------------')
+            else:
+                raise exceptions.UserError("El proyecto no se ha encontrado o el nombre ha cambiado.")
+        else:
+            raise exceptions.UserError("El proyecto sebe estar marcado como realizado para poder crear la orden de fabricación.")
+
+        return True
+
+
+
+
+
+
 
     def action_calcular_areas(self):
         _logger.critical("Calcular Áreas")

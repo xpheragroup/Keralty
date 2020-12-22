@@ -298,6 +298,8 @@
                         confirm="Realizando el cálculo de áreas." groups="base.group_user" />
                     <button name="action_realizar" string="Marcar Realizado" type="object" class="oe_highlight"
                         confirm="Esta opción es irreversible y deshabilitará la edición del formulario. ¿Desea continuar?" groups="base.group_user" />
+                    <button name="action_producir" string="Generar Órden de Fabricación" type="object" class="oe_highlight"
+                        confirm="Esta opción es irreversible y deshabilitará la edición del formulario. ¿Desea continuar?" groups="base.group_user" />
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,cancel"/>
                 </header>
                 <sheet>
@@ -389,7 +391,7 @@
     <!-- menuitem name="Parametrización" id="keralty_module.menu_1" parent="keralty_module.menu_root"/-->
     <menuitem name="Formulario Clientes" id="keralty_module.menu_2" parent="keralty_module.menu_root"/>
     <menuitem name="Formulario Validación" id="keralty_module.menu_3" parent="keralty_module.menu_root"/>
-    <menuitem name="Gestión" id="keralty_module.menu_4" parent="keralty_module.menu_root"/>
+    <menuitem name="Gestión" id="keralty_module.menu_4" parent="keralty_module.menu_root" groups="mrp.group_mrp_user"/>
     <menuitem name="Configuración" id="keralty_module.menu_5" parent="keralty_module.menu_root"/>
     <!-- actions -->
     <!--menuitem name="Lista de Parametrizaciones" id="keralty_module.menu_1_list" parent="keralty_module.menu_1"
