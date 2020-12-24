@@ -229,9 +229,9 @@
                     <group string="Ocupación Centro Médico">
                         <span class="oe_inline">Ingrese la cantidad máxima esperada al mismo tiempo para cada una de las categorías indicadas a continuación:</span>
                         <br/>
-                        <h2><field name="numero_usuarios" class="oe_inline" placeholder="Número de Usuarios" /><span class="fa fa-male "/></h2>
-                        <h2><field name="numero_empleados" class="oe_inline" placeholder="Número de Empleados" /><span class="fa fa-male "/></h2>
-                        <h2><field name="terceros" class="oe_inline" placeholder="Terceros"/><span class="fa fa-male "/></h2>
+                        <h2>Número de Usuarios: <field name="numero_usuarios" widget="float" class="oe_inline" placeholder="Número de Usuarios" /><span class="fa fa-male "/></h2>
+                        <h2>Número de Empleados: <field name="numero_empleados" widget="float" class="oe_inline" placeholder="Número de Empleados" /><span class="fa fa-male "/></h2>
+                        <h2>Número de Terceros: <field name="terceros" widget="float" class="oe_inline" placeholder="Terceros"/><span class="fa fa-male "/></h2>
                     </group>
                     <notebook>
                         <!--<templates>-->

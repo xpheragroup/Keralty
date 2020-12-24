@@ -44,10 +44,13 @@ class FormularioCliente(models.Model):
     nombre_proyecto = fields.Char(required=True, string="Nombre Proyecto",)
     # Configuración empresa
     empresa_seleccionada = fields.Many2many(string="Selección de Empresa(s)",
-                    comodel_name='product.attribute.value',
-                    relation="product_cliente_empresa",
+                    comodel_name='res.partner',
+                    relation="product_cliente_empresa_partner",
                     help="Selección de Empresas asociadas a la solicitud.",
-                    domain="[['attribute_id.name','ilike','Empresa']]",
+                    # domain="[('user_ids', '=', False)]",
+                    # domain="[['attribute_id.name','ilike','Empresa']]",
+                    domain="['&',('company_type','=', 'company'), ('is_company', '=', True), ('supplier_rank', '=', '0')]",
+                    check_company=True,
                     required=True,
                     readonly=True, states={'draft': [('readonly', False)]},)
     producto_seleccionado = fields.Many2many(string="Selección de Producto(s)",
@@ -89,7 +92,7 @@ class FormularioCliente(models.Model):
                     column1="product_id",
                     column2="product_qty",
                     help="Selección de Áreas asociadas a la(s) Sede(s) seleccionada(s).",
-                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
+                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=', producto_seleccionado)]",
                     required=True,
                     copy=True,
                     readonly=True, states={'draft': [('readonly', False)]},)
@@ -123,32 +126,50 @@ class FormularioCliente(models.Model):
         res = {}
         objetoBusqueda = None
         self.areas_asociadas_sede = None
+        if self.producto_seleccionado:
+            _logger.critical("------------- SEDE LOAD: -----------")
+            _logger.warning(self.producto_seleccionado)
+            '''
+                Buscar la variante de producto: y compararla con el valor de la variante del producto_seleccionado
+                product.template.attribute.line
+                product.product_template_attribute_value_ids
+                product.template.attribute.value
+                del product.product sacar el attribute id product_template_attribute_value_ids
+                
+            '''
 
-        for sede_product_template in self.sede_seleccionada:
-            for area in sede_product_template.bom_ids:
-                _logger.critical("área: ")
-                _logger.critical(area)
-                _logger.critical(area.product_tmpl_id.name)
-                _logger.critical(area.product_qty)
-                for linea_bom in area.bom_line_ids:
-                    _logger.critical("------------- BOM LINE -----------")
-                    _logger.warning(linea_bom.product_tmpl_id.name)
-                    _logger.warning(linea_bom.product_qty)
-                self.areas_asociadas_sede |= area.bom_line_ids
+            for sede_product_template in self.sede_seleccionada:
+                # if sede_product_template.attribute_line_ids.value in self.producto_seleccionado:
+                for area in sede_product_template.bom_ids:
+                    for linea_bom in area.bom_line_ids:
+                        _logger.critical("------------- BOM LINE -----------")
+                        _logger.warning(linea_bom.product_tmpl_id.name)
+                        _logger.warning(linea_bom.product_qty)
+
+                    for linea_bom in area.bom_line_ids:
+                        if linea_bom.product_id.product_tmpl_id.attribute_value_ids.name in self.producto_seleccionado.name:
+                            if not total_bom_lines:
+                                total_bom_lines = linea_bom
+                            else:
+                                total_bom_lines += linea_bom
+
+                    self.areas_asociadas_sede |= total_bom_lines
 
 
-        for linea_bom in self.areas_asociadas_sede:
-            linea_bom.product_qty = 1
+            for linea_bom in self.areas_asociadas_sede:
+                linea_bom.product_qty = 1
 
-        warning = {
-            'title': "Sede Seleccionada PRINT: {}".format(
-                self.sedes_seleccionadas
-            ),
-            'message': "objeto búsqueda: {}".format(
-                objetoBusqueda
-            ),
-        }
-        res.update({'warning': warning})
+            warning = {
+                'title': "Sede Seleccionada PRINT: {}".format(
+                    self.sedes_seleccionadas
+                ),
+                'message': "objeto búsqueda: {}".format(
+                    objetoBusqueda
+                ),
+            }
+            res.update({'warning': warning})
+        else:
+            raise exceptions.UserError("Debe seleccionar al menos un producto.")
 
 
     def action_validar_proyecto(self):
@@ -529,7 +550,7 @@ class FormularioValidacion(models.Model):
                 # production_id._onchange_bom_id()
 
                 # with self.assertRaises(exceptions.UserError):
-                production_id.action_confirm()
+                # production_id.action_confirm()
 
                 _logger.critical('--------ORDEN PRODUCCIÓN----------')
                 _logger.critical('----------------------------------')
