@@ -277,7 +277,7 @@
                                         <field name="areas_asociadas_sede" widget="many2many">
                                             <tree string="Áreas" editable="top" create="true" edit="false">
                                                 <field name="company_id" invisible="1"/>
-<!--                                                <field name="x_studio_field_JdgYW" options="{'size'     : [0, 90]}" widget="image"/>-->
+                                                <field name="product_image" options="{'size':[0,90]}" widget="image"/>
 <!--                                                <field name="attachments_count" string="Cantidad de Archivos"/>-->
 <!--                                                <field name="product_id.image_128" string="Imágen" widget="image"/>-->
                                                 <field name="product_id" string="Área"/>

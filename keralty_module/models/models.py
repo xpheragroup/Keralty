@@ -247,6 +247,35 @@ class MrpBomLine(models.Model):
     m2 = fields.Float('M2', default=1.0)
     total_m2 = fields.Float('Total', default=1.0, digits=(16, 2), readonly=True, group_operator="sum",
                             compute='_compute_total_m2',)
+    product_image = fields.Binary(string="Imágen Área", compute='_compute_product_image')
+
+
+    @api.depends('product_image')
+    def _compute_product_image(self):
+        for record in self:
+            if record.product_id:
+                if record.product_id.image_1024:
+                    record.product_image = record.product_id.image_1024
+                if record.product_id.image_128:
+                    record.product_image = record.product_id.image_128
+                if record.product_id.image_1920:
+                    record.product_image = record.product_id.image_1920
+                if record.product_id.image_256:
+                    record.product_image = record.product_id.image_256
+                if record.product_id.image_512:
+                    record.product_image = record.product_id.image_512
+
+                if record.product_tmpl_id:
+                    if record.product_tmpl_id.image_1024:
+                        record.product_image = record.product_tmpl_id.image_1024
+                    if record.product_tmpl_id.image_128:
+                        record.product_image = record.product_tmpl_id.image_128
+                    if record.product_tmpl_id.image_1920:
+                        record.product_image = record.product_tmpl_id.image_1920
+                    if record.product_tmpl_id.image_256:
+                        record.product_image = record.product_tmpl_id.image_256
+                    if record.product_tmpl_id.image_512:
+                        record.product_image = record.product_tmpl_id.image_512
 
     @api.depends('m2','total_m2')
     def _compute_total_m2(self):
