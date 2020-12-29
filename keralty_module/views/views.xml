@@ -215,23 +215,58 @@
                         <!-- <span class="o_form_label">Título Formulario Parametrización </span> -->
                         <h1><field name="nombre_proyecto" class="oe_inline" placeholder="Nombre Proyecto"/></h1>
                     </div>
-                    <group string="Empresas">
+                    <group string="Identificación del proyecto">
                         <span class="oe_inline">Seleccione la información que se presenta a continuación:</span>
                         <br/>
-                        <group>
-                            <field name="empresa_seleccionada" string="Selección de Empresa(s)" widget="many2many_tags"/>
-                            <field name="producto_seleccionado" string="Selección de Producto(s)" widget="many2many_tags"/>
-                            <field name="sede_seleccionada" string="Selección de Sedes(s)" widget="many2many_tags"/>
-                            <field name="tipo_intervencion" />
-                        </group>
-                        <group></group>
+                        <field name="empresa_seleccionada" string="Selección de Empresa(s)" widget="many2many_tags"/>
+                        <field name="producto_seleccionado" string="Selección de Producto(s)" widget="many2many_tags"/>
+                        <field name="sede_seleccionada" string="Selección de Sedes(s)" widget="many2many_tags"/>
+                        <field name="tipo_intervencion" />
                     </group>
-                    <group string="Ocupación Centro Médico">
-                        <span class="oe_inline">Ingrese la cantidad máxima esperada al mismo tiempo para cada una de las categorías indicadas a continuación:</span>
+                    <group string="Ubicación geográfica">
                         <br/>
-                        <h2>Número de Usuarios: <field name="numero_usuarios" widget="float" class="oe_inline" placeholder="Número de Usuarios" /><span class="fa fa-male "/></h2>
-                        <h2>Número de Empleados: <field name="numero_empleados" widget="float" class="oe_inline" placeholder="Número de Empleados" /><span class="fa fa-male "/></h2>
-                        <h2>Número de Terceros: <field name="terceros" widget="float" class="oe_inline" placeholder="Terceros"/><span class="fa fa-male "/></h2>
+                        <field name="pais" />
+                        <field name="departamento" />
+                        <field name="ciudad" />
+                        <field name="poligono" />
+                        <field name="especificaciones_adicionales" />
+                    </group>
+                    <group string="Ocupación">
+                        <span class="oe_inline">A continuación encontrará la información de las áreas sugeridas para el centro médico. Teniendo en cuenta las proyecciones de crecimiento, en la columna "Valor inicial", se debe ingresar la ocupación esperada para el momento de apertura del centro médico. En la columna "Valor final", se debe ingresar la ocupación total esperada para el centro médico.</span>
+                        <br/>
+                        <h3>Usuarios:</h3>
+                        <br/>
+                        <span class="oe_inline">Distribución por género</span>
+                        <br/>
+                        <field name="usuarios_femenino" />
+                        <field name="usuarios_masculino" />
+                        <span class="oe_inline">Distribución por grupo etario</span>
+                        <br/>
+                        <field name="usuarios_menores_10_anos" />
+                        <field name="usuarios_entre_10_19_anos" />
+                        <field name="usuarios_entre_20_59_anos" />
+                        <field name="usuarios_mayores_59_anos" />
+                        <h3>Empleados: </h3>
+                        <br/>
+                        <span class="oe_inline">Distribución por género</span>
+                        <br/>
+                        <field name="empleados_femenino" />
+                        <field name="empleados_masculino" />
+                        <span class="oe_inline">Distribución por tipo de labor</span>
+                        <br/>
+                        <field name="personal_administrativo" />
+                        <field name="personal_asistencial" />
+                        <h3>Terceros: </h3>
+                        <br/>
+                        <span class="oe_inline">Distribución por género</span>
+                        <br/>
+                        <field name="terceros_femenino" />
+                        <field name="terceros_masculino" />
+                        <span class="oe_inline">Distribución por servicios a subcontratar</span>
+                        <br/>
+                        <field name="servicios_generales" />
+                        <field name="seguridad" />
+
                     </group>
                     <notebook>
                         <!--<templates>-->
@@ -242,6 +277,9 @@
                                         <field name="areas_asociadas_sede" widget="many2many">
                                             <tree string="Áreas" editable="top" create="true" edit="false">
                                                 <field name="company_id" invisible="1"/>
+<!--                                                <field name="x_studio_field_JdgYW" options="{'size'     : [0, 90]}" widget="image"/>-->
+<!--                                                <field name="attachments_count" string="Cantidad de Archivos"/>-->
+<!--                                                <field name="product_id.image_128" string="Imágen" widget="image"/>-->
                                                 <field name="product_id" string="Área"/>
                                                 <field name="product_qty" />
                                             </tree>

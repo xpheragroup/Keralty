@@ -2,6 +2,8 @@
 
 from odoo import models, fields, api, exceptions
 import logging
+import time
+from datetime import datetime
 
 _logger = logging.getLogger(__name__)
 # class FormularioParametrizacion(models.Model):
@@ -68,13 +70,6 @@ class FormularioCliente(models.Model):
                     readonly=True, states={'draft': [('readonly', False)]},)
     tipo_intervencion = fields.Selection([('sede_nueva', 'Sede Nueva'),('adecuacion', 'Adecuación'),('remodelacion', 'Remodelación'),('ampliacion', 'Ampliación')],
                     readonly=True, states={'draft': [('readonly', False)]},)
-    # Ocupación centro médico
-    numero_usuarios = fields.Float(string="Número de Usuarios", required=True, help="Número de Usuarios",
-                                   readonly=True, states={'draft': [('readonly', False)]},)
-    numero_empleados = fields.Float(string="Número de Empleados", required=True, help="Número de Empleados",
-                                    readonly=True, states={'draft': [('readonly', False)]},)
-    terceros = fields.Float(string="Terceros", required=True, help="Terceros",
-                    readonly=True, states={'draft': [('readonly', False)]},)
 
     # Listado de áreas asociadas en campo BoM de mrp.production
     sedes_seleccionadas = fields.Many2many(string="Selección de Sede(s)",
@@ -92,10 +87,65 @@ class FormularioCliente(models.Model):
                     column1="product_id",
                     column2="product_qty",
                     help="Selección de Áreas asociadas a la(s) Sede(s) seleccionada(s).",
-                    domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=', producto_seleccionado)]",
+                    domain="['&',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.categ_id.name','like','Cliente'),('product_tmpl_id.categ_id.name','ilike','Cliente')]",
                     required=True,
                     copy=True,
                     readonly=True, states={'draft': [('readonly', False)]},)
+
+    # Ubicación geográfica
+    pais = fields.Many2one(required=True, string="País", comodel_name='res.country',help="País seleccionado.", readonly=True, states={'draft': [('readonly', False)]},)
+    departamento = fields.Many2one('res.country.state', 'Departamento / Estado', domain="[('country_id', '=', pais)]", required=True, readonly=True, states={'draft': [('readonly', False)]},)
+    ciudad = fields.Char(required=True, string="Ciudad / Municipio", readonly=True, states={'draft': [('readonly', False)]},)
+    poligono = fields.Char(required=True, string="Polígonos de búsqueda", readonly=True, states={'draft': [('readonly', False)]},)
+    especificaciones_adicionales = fields.Char(required=True, string="Especificaciones adicionales", readonly=True, states={'draft': [('readonly', False)]},)
+
+
+    # Ocupación centro médico
+    numero_usuarios = fields.Float(string="Número de Usuarios", required=False, help="Número de Usuarios",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    numero_empleados = fields.Float(string="Número de Empleados", required=False, help="Número de Empleados",
+                                    readonly=True, states={'draft': [('readonly', False)]},)
+    terceros = fields.Float(string="Terceros", required=False, help="Terceros",
+                    readonly=True, states={'draft': [('readonly', False)]},)
+    especificaciones_adicionales = fields.Char(required=True, string="Especificaciones adicionales",)
+
+    # usuarios
+    # por género
+    usuarios_femenino = fields.Float(string="Femenino", required=True, help="Número de Usuarios Femeninos",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    usuarios_masculino = fields.Float(string="Masculino", required=True, help="Número de Usuarios Masculinos",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    # por grupo etario
+    usuarios_menores_10_anos = fields.Float(string="Menores de 10 años", required=True, help="Número de Usuarios Menores de 10 años",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    usuarios_entre_10_19_anos = fields.Float(string="Entre 10 y 19 años", required=True, help="Número de Usuarios Entre 10 y 19 años",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    usuarios_entre_20_59_anos = fields.Float(string="Entre 20 y 59 años", required=True, help="Número de Usuarios Entre 20 y 59 años",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+    usuarios_mayores_59_anos = fields.Float(string="Mayores de 59 años", required=True, help="Número de Usuarios Mayores de 59 años",
+                                   readonly=True, states={'draft': [('readonly', False)]},)
+
+    # Empleados
+    # por género
+    empleados_femenino = fields.Float(string="Femenino", required=True, help="Número de Empleados Femeninos",
+                                     readonly=True, states={'draft': [('readonly', False)]}, )
+    empleados_masculino = fields.Float(string="Masculino", required=True, help="Número de Empleados Masculinos",
+                                      readonly=True, states={'draft': [('readonly', False)]}, )
+    personal_administrativo = fields.Float(string="Personal administrativo", required=True, help="Cantidad de Personal administrativo",
+                                      readonly=True, states={'draft': [('readonly', False)]}, )
+    personal_asistencial = fields.Float(string="Personal asistencial", required=True, help="Cantidad de Personal asistencial",
+                                      readonly=True, states={'draft': [('readonly', False)]}, )
+
+    # Terceros
+    # por género
+    terceros_femenino = fields.Float(string="Femenino", required=True, help="Número de Tercecros Femeninos",
+                                     readonly=True, states={'draft': [('readonly', False)]}, )
+    terceros_masculino = fields.Float(string="Masculino", required=True, help="Número de Terceros Masculinos",
+                                      readonly=True, states={'draft': [('readonly', False)]}, )
+    servicios_generales = fields.Float(string="Servicios Generales", required=True, help="Cantidad de Terceros Servicios Generales",
+                                      readonly=True, states={'draft': [('readonly', False)]}, )
+    seguridad = fields.Float(string="Seguridad", required=True, help="Cantidad de Terceros Seguridad ",
+                                      readonly=True, states={'draft': [('readonly', False)]}, )
 
     # Sistema de Estados
     state = fields.Selection([
@@ -126,50 +176,40 @@ class FormularioCliente(models.Model):
         res = {}
         objetoBusqueda = None
         self.areas_asociadas_sede = None
-        if self.producto_seleccionado:
-            _logger.critical("------------- SEDE LOAD: -----------")
-            _logger.warning(self.producto_seleccionado)
-            '''
-                Buscar la variante de producto: y compararla con el valor de la variante del producto_seleccionado
-                product.template.attribute.line
-                product.product_template_attribute_value_ids
-                product.template.attribute.value
-                del product.product sacar el attribute id product_template_attribute_value_ids
-                
-            '''
+        total_bom_line_ids = None
 
-            for sede_product_template in self.sede_seleccionada:
-                # if sede_product_template.attribute_line_ids.value in self.producto_seleccionado:
-                for area in sede_product_template.bom_ids:
-                    for linea_bom in area.bom_line_ids:
-                        _logger.critical("------------- BOM LINE -----------")
-                        _logger.warning(linea_bom.product_tmpl_id.name)
-                        _logger.warning(linea_bom.product_qty)
+        for sede_product_template in self.sede_seleccionada:
+            for area in sede_product_template.bom_ids:
+                for linea_bom in area.bom_line_ids:
+                    for producto_seleccionado in self.producto_seleccionado:
+                        if producto_seleccionado.name in linea_bom.display_name:
+                            if "Cliente" in linea_bom.product_id.categ_id.name:
+                                if total_bom_line_ids:
+                                    total_bom_line_ids += linea_bom
+                                else:
+                                    total_bom_line_ids = linea_bom
+                area.bom_line_ids = None
+                area.bom_line_ids = total_bom_line_ids
 
-                    for linea_bom in area.bom_line_ids:
-                        if linea_bom.product_id.product_tmpl_id.attribute_value_ids.name in self.producto_seleccionado.name:
-                            if not total_bom_lines:
-                                total_bom_lines = linea_bom
-                            else:
-                                total_bom_lines += linea_bom
+                self.areas_asociadas_sede |= area.bom_line_ids
 
-                    self.areas_asociadas_sede |= total_bom_lines
+                if not total_bom_line_ids:
+                    raise exceptions.UserError("No se encuentra ninguna asociación entre el Producto y la Sede seleccionados.")
+                # self.areas_asociadas_sede |= bom_created
 
 
-            for linea_bom in self.areas_asociadas_sede:
-                linea_bom.product_qty = 1
+        for linea_bom in self.areas_asociadas_sede:
+            linea_bom.product_qty = 1
 
-            warning = {
-                'title': "Sede Seleccionada PRINT: {}".format(
-                    self.sedes_seleccionadas
-                ),
-                'message': "objeto búsqueda: {}".format(
-                    objetoBusqueda
-                ),
-            }
-            res.update({'warning': warning})
-        else:
-            raise exceptions.UserError("Debe seleccionar al menos un producto.")
+        warning = {
+            'title': "Sede Seleccionada PRINT: {}".format(
+                self.sedes_seleccionadas
+            ),
+            'message': "objeto búsqueda: {}".format(
+                objetoBusqueda
+            ),
+        }
+        res.update({'warning': warning})
 
 
     def action_validar_proyecto(self):
@@ -294,7 +334,7 @@ class FormularioValidacion(models.Model):
                     #readonly=True, states={'draft': [('readonly', False)]},)
 
     porcentaje_pasillos = fields.Float('Porcentaje de pasillos y muros adicionales', default=30.0)
-    total_m2_areas = fields.Float('Total M2 proyecto', default=1.0, digits=(16, 2), readonly=True, group_operator="sum")
+    total_m2_areas = fields.Float('Total M2 proyecto', default=1.0, digits=(16, 2), readonly=True,)
 
 
     # Sistema de Estados
@@ -353,9 +393,37 @@ class FormularioValidacion(models.Model):
             Product = self.env['product.product']
             BomLine = self.env['mrp.bom.line']
 
+            # Create Category
+            existe_categoria = self.env['product.category'].search([('name', '=', 'Consultas y Requerimientos')])
+            if not existe_categoria:
+                categoria_consul_requer = self.env['product.category'].create({
+                    'name': 'Consultas y Requerimientos',
+                })
+            else:
+                categoria_consul_requer = existe_categoria
+
+            # Referencia Interna: Existe, con timestamp y creamos. Iniciales del nombre del proyecto
+            iniciales_proyecto = [s[0] for s in self.nombre_tecnico.split()]
+            timestamp = datetime.timestamp(datetime.now())
+            iniciales_proyecto = ''.join(str(x) for x in iniciales_proyecto) + '-' + str(timestamp).split('.')[0]
+            # existe_ref_interna = self.env['product.category'].search([('name', '=', 'Consultas y Requerimientos')])
+
+            company_id = self.env.company
+
+            warehouse = self.env.ref('stock.warehouse0')
+            route_manufacture = warehouse.manufacture_pull_id.route_id.id
+            route_mto = warehouse.mto_pull_id.route_id.id
+
             # Create Template Product
             product_template = self.env['product.template'].create({
                 'name': self.nombre_tecnico,
+                'purchase_ok': False,
+                'type': 'product',
+                'categ_id': categoria_consul_requer.id,
+                'default_code': iniciales_proyecto.upper(),
+                'company_id': company_id.id,
+                'route_ids': [(6, 0, [route_manufacture, route_mto])]
+
             })
             # product = Product.create({
             #             'name': self.nombre_tecnico,
@@ -673,8 +741,18 @@ class FormularioValidacion(models.Model):
                     # _logger.critical(" CALC TOTAL_M2 ")
                     # area_ciente.total_m2 = area_derivada.product_qty * area_ciente.m2
 
-        # TODO: Utilizar valor de pasillos...
-        # self.total_m2_areas =
+        # TODO: Utilizar valor de pasillos... Eliminar calculos de suma total anteriores
+        self.total_m2_areas = 0
+        for line in self.areas_cliente:
+            self.total_m2_areas += line.total_m2
+        for line in self.areas_derivadas:
+            self.total_m2_areas += line.total_m2
+        for line in self.areas_diseño:
+            self.total_m2_areas += line.total_m2
+
+        if self.porcentaje_pasillos > 0:
+            self.total_m2_areas = self.total_m2_areas + (self.total_m2_areas * self.porcentaje_pasillos) / 100
+        # self.total_m2_areas = self.areas_cliente.total_m2# + self.areas_derivadas.total_m2 + self.areas_diseño.total_m2
         return True
 
     @api.depends('areas_cliente','areas_derivadas','areas_diseño')
