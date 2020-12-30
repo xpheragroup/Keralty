@@ -493,57 +493,48 @@ class FormularioValidacion(models.Model):
             _logger.critical(self.areas_cliente)
 
             for area_derivada in self.areas_derivadas:
-                # area_derivada.product_tmpl_id.bom_product_template_attribute_value_ids = None
-
+                # _logger.critical("BOM: AREAS DERIVADAS: ")
+                # _logger.critical(bom_created)
+                # _logger.critical(area_derivada)
+                # area_derivada.product_tmpl_id = product_template.id # Cambia el producto asociado, no sirve, se debe duplicar
                 # Create Product
                 _logger.critical("BOM: AREAS DERIVADAS: ")
                 _logger.critical(area_derivada)
                 _logger.critical(area_derivada.product_tmpl_id)
                 _logger.critical(area_derivada.product_id)
-                if total_boom_line_ids == None:
-                    total_boom_line_ids = area_derivada.bom_line_ids
-                else:
-                    total_boom_line_ids += area_derivada.bom_line_ids
 
-                # if area_derivada.product_id.name != None:
-                #
-                #     _logger.critical("Ok? crear producto")
-                #     product = Product.create({
-                #         'name': area_derivada.product_id.name,
-                #         # 'product_qty': area_derivada.product_qty,
-                #     })
-                #     _logger.critical("Ok? crear producto")
-                #
-                #     BomLine.create({
-                #         'bom_id': bom_created.id,  # BOM ASOCIADO
-                #         'product_id': product.id,
-                #         'product_qty': area_derivada.product_qty,
-                #     })
+                BomLine.create({
+                    'bom_id': bom_created.id,
+                    # 'product_id': area_derivada.product_id.id,
+                    'product_id': area_derivada.product_tmpl_id.product_variant_id.id,
+                    # 'product_tmpl_id': area_derivada.product_tmpl_id.id,
+                    'product_qty': area_derivada.product_qty,
+                })
+                # if total_boom_line_ids == None:
+                #     total_boom_line_ids = area_derivada.bom_line_ids
+                # else:
+                #     total_boom_line_ids += area_derivada.bom_line_ids
 
             for area_diseño in self.areas_diseño:
-                # area_diseño.product_tmpl_id.bom_product_template_attribute_value_ids = None
-
+                # area_diseño.product_tmpl_id = product_template.id
                 # Create Product
                 _logger.critical("BOM: AREAS DISEÑO: ")
                 _logger.critical(area_diseño)
                 _logger.critical(area_diseño.product_tmpl_id)
                 _logger.critical(area_diseño.product_id)
-                if total_boom_line_ids == None:
-                    total_boom_line_ids = area_diseño.bom_line_ids
-                else:
-                    total_boom_line_ids += area_diseño.bom_line_ids
 
-                # if area_diseño.product_id.name != None:
-                #     product = Product.create({
-                #         'name': area_diseño.product_id.name,
-                #         # 'product_qty': area_diseño.product_qty,
-                #     })
-                #
-                #     BomLine.create({
-                #         'bom_id': bom_created.id,  # BOM ASOCIADO
-                #         'product_id': product.id,
-                #         'product_qty': area_diseño.product_qty,
-                #     })
+                BomLine.create({
+                    'bom_id': bom_created.id,
+                    # 'product_id': area_diseño.product_id.id,
+                    'product_id': area_diseño.product_tmpl_id.product_variant_id.id,
+                    # 'product_tmpl_id': area_diseño.product_tmpl_id.id,
+                    'product_qty': area_diseño.product_qty,
+                })
+
+                # if total_boom_line_ids == None:
+                #     total_boom_line_ids = area_diseño.bom_line_ids
+                # else:
+                #     total_boom_line_ids += area_diseño.bom_line_ids
 
             for bom_without_attrs in total_boom_line_ids:
                 bom_without_attrs.bom_product_template_attribute_value_ids = None
