@@ -165,6 +165,10 @@ class FormularioCliente(models.Model):
         if not self.state:
             self.state = 'draft'
 
+    @api.onchange('producto_seleccionado')
+    def _onchange_producto_seleccionado(self):
+        self.sede_seleccionada = None
+        self.areas_asociadas_sede = None
     #
     '''
         Copia LdM
