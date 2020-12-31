@@ -256,26 +256,31 @@ class MrpBomLine(models.Model):
             if record.product_id:
                 if record.product_id.image_1024:
                     record.product_image = record.product_id.image_1024
-                if record.product_id.image_128:
+                elif record.product_id.image_128:
                     record.product_image = record.product_id.image_128
-                if record.product_id.image_1920:
+                elif record.product_id.image_1920:
                     record.product_image = record.product_id.image_1920
-                if record.product_id.image_256:
+                elif record.product_id.image_256:
                     record.product_image = record.product_id.image_256
-                if record.product_id.image_512:
+                elif record.product_id.image_512:
                     record.product_image = record.product_id.image_512
+                else:
+                    record.product_image = None
 
                 if record.product_tmpl_id:
                     if record.product_tmpl_id.image_1024:
                         record.product_image = record.product_tmpl_id.image_1024
-                    if record.product_tmpl_id.image_128:
+                    elif record.product_tmpl_id.image_128:
                         record.product_image = record.product_tmpl_id.image_128
-                    if record.product_tmpl_id.image_1920:
+                    elif record.product_tmpl_id.image_1920:
                         record.product_image = record.product_tmpl_id.image_1920
-                    if record.product_tmpl_id.image_256:
+                    elif record.product_tmpl_id.image_256:
                         record.product_image = record.product_tmpl_id.image_256
-                    if record.product_tmpl_id.image_512:
+                    elif record.product_tmpl_id.image_512:
                         record.product_image = record.product_tmpl_id.image_512
+                    else:
+                        record.product_image = None
+
 
     @api.depends('m2','total_m2')
     def _compute_total_m2(self):
@@ -638,11 +643,26 @@ class FormularioValidacion(models.Model):
                 # production_id._onchange_bom_id()
 
                 # with self.assertRaises(exceptions.UserError):
-                # production_id.action_confirm()
+                production_id.action_confirm()
+
+                all_purchase_orders = self.env['purchase.order'].search([('state', '=', 'draft')], order='id asc')
+
+                _logger.critical('--------ORDEN COMPRA ----------')
+                _logger.critical('----------------------------------')
+                _logger.critical(all_purchase_orders)
+                _logger.critical('----------------------------------')
+
+                for order in all_purchase_orders:
+                    order.button_confirm()
 
                 _logger.critical('--------ORDEN PRODUCCIÓN----------')
                 _logger.critical('----------------------------------')
                 _logger.critical(production_id)
+                _logger.critical('----------------------------------')
+
+                _logger.critical('--------ORDEN COMPRA ----------')
+                _logger.critical('----------------------------------')
+                _logger.critical(all_purchase_orders)
                 _logger.critical('----------------------------------')
             else:
                 raise exceptions.UserError("El proyecto no se ha encontrado o el nombre ha cambiado.")
