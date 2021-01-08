@@ -647,7 +647,7 @@ class FormularioValidacion(models.Model):
                 # production_id._onchange_bom_id()
 
                 # with self.assertRaises(exceptions.UserError):
-                #production_id.action_confirm()
+                production_id.action_confirm()
 
                 all_purchase_orders = self.env['purchase.order'].search([('state', '=', 'draft')], order='id asc')
 
