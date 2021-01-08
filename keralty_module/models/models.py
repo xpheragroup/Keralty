@@ -185,8 +185,8 @@ class FormularioCliente(models.Model):
         for sede_product_template in self.sede_seleccionada:
             for area in sede_product_template.bom_ids:
                 for linea_bom in area.bom_line_ids:
-                    for producto_seleccionado in self.producto_seleccionado:
-                        if producto_seleccionado.name in linea_bom.display_name:
+                    #for producto_seleccionado in self.producto_seleccionado:
+                        #if producto_seleccionado.name in linea_bom.display_name:
                             if "Cliente" in linea_bom.product_id.categ_id.name:
                                 if total_bom_line_ids:
                                     total_bom_line_ids += linea_bom
@@ -647,7 +647,7 @@ class FormularioValidacion(models.Model):
                 # production_id._onchange_bom_id()
 
                 # with self.assertRaises(exceptions.UserError):
-                production_id.action_confirm()
+                #production_id.action_confirm()
 
                 all_purchase_orders = self.env['purchase.order'].search([('state', '=', 'draft')], order='id asc')
 
@@ -715,7 +715,7 @@ class FormularioValidacion(models.Model):
                 _logger.critical(child_bom.product_id.name)
                 # str.find("soccer")
                 # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
-                if "Área" in child_bom.product_id.name:
+                if "Área" in child_bom.product_id.name or "Area" in child_bom.product_id.name:
                     # _logger.critical(child_bom.product_qty)
                     area_ciente.m2 = child_bom.product_qty
                     self.total_m2_areas += area_ciente.m2 * area_ciente.product_qty # child_bom.total_m2
@@ -732,7 +732,7 @@ class FormularioValidacion(models.Model):
                 # _logger.critical(child_bom.product_id.name)
                 # str.find("soccer")
                 # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
-                if "Área" in bom_line.product_id.name:
+                if "Área" in bom_line.product_id.name or "Area" in bom_line.product_id.name:
                     # _logger.critical(child_bom.product_qty)
                     area_derivada.m2 = bom_line.product_qty
                     self.total_m2_areas += area_derivada.m2 * area_derivada.product_qty # bom_line.total_m2
@@ -776,7 +776,7 @@ class FormularioValidacion(models.Model):
                 # _logger.critical(child_bom.product_id.name)
                 # str.find("soccer")
                 # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
-                if "Área" in bom_line.product_id.name:
+                if "Área" in bom_line.product_id.name or "Area" in bom_line.product_id.name:
                     # _logger.critical(child_bom.product_qty)
                     area_diseño.m2 = bom_line.product_qty
                     self.total_m2_areas += area_diseño.m2 * area_diseño.product_qty # bom_line.total_m2
