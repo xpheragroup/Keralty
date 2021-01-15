@@ -231,9 +231,9 @@ class FormularioCliente(models.Model):
 
         self.state = 'confirmed'
         # msg = _("El usuario %s ha confirmado un nuevo Formulario Cliente. %s<br/>" % self.env.user.name, self.name)
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        base_url += '/web#id=%d&view_type=form&model=%s' % (self.id, self._name)
-        msg = ('Formulario Cliente \"{}\", confirmado por el usuario: \"{}\". \n\n{}'.format(self.nombre_proyecto, self.env.user.name, base_url))
+        # base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        # base_url += '/web#id=%d&view_type=form&model=%s' % (self.id, self._name)
+        msg = ('Formulario Cliente \"{}\", confirmado por el usuario: \"{}\". \n\n'.format(self.nombre_proyecto, self.env.user.name)) #base_url))
         # self.env['mail.activity'].create({'res_id': self.id,
         #                                 'res_model_id': self.env['ir.model'].search([('model', '=', 'keralty_module.formulario.cliente')]).id,
         #                                 'activity_type_id': 4,
@@ -251,18 +251,18 @@ class FormularioCliente(models.Model):
         #                                  'partner_ids': [(4, 3, 1, 2)],
         #                                  # partner to whom you send notification
         #                                  })
-        notification_ids = [(0, 6,
+        notification_ids = [(0,0,
                         # {
                         #     'res_partner_id': self.env.user.partner_id.id,
                         #     'notification_type': 'inbox'
                         # },
                         {
-                            'res_partner_id': 3,
+                            'res_partner_id': self.env['res.partner'].search([('name', 'ilike', 'Catalina')], limit=1).id,
                             'notification_type': 'inbox'
                         }),
                         (0,0,
                         {
-                            'res_partner_id': 116,
+                            'res_partner_id': self.env['res.partner'].search([('name', 'ilike', 'Izaquita')], limit=1).id,
                             'notification_type': 'inbox'
                         }
                         )]
