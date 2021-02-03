@@ -206,6 +206,7 @@ class FormularioCliente(models.Model):
 
         for linea_bom in self.areas_asociadas_sede:
             linea_bom.product_qty = 1
+            linea_bom.cantidad_final = 1
 
         warning = {
             'title': "Sede Seleccionada PRINT: {}".format(
@@ -271,18 +272,21 @@ class PurchaseOrder(models.Model):
             _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
             _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
             _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
-            origin_split = record.origin.split(',')
-            _logger.critical(origin_split)
-            # for origen in origin_split:
-            referencia_origen = self.env['mrp.production'].search([('name', '=', origin_split[-1].strip())])
-            origen_producto = self.env['mrp.production'].search([('name', '=', referencia_origen.origin)])
-            _logger.critical(origen_producto.product_id.name)
-            if origen_producto:
-                record.nombre_proyecto = origen_producto.product_id.name
+            if record.origin:
+                origin_split = record.origin.split(',')
+                _logger.critical(origin_split)
+                # for origen in origin_split:
+                referencia_origen = self.env['mrp.production'].search([('name', '=', origin_split[-1].strip())])
+                origen_producto = self.env['mrp.production'].search([('name', '=', referencia_origen.origin)])
+                _logger.critical(origen_producto.product_id.name)
+                if origen_producto:
+                    record.nombre_proyecto = origen_producto.product_id.name
 
-                if origen_producto.origin:
-                    origen_producto_deep_level = self.env['mrp.production'].search([('name', '=', origen_producto.origin)])
-                    record.nombre_proyecto = origen_producto_deep_level.product_id.name
+                    if origen_producto.origin:
+                        origen_producto_deep_level = self.env['mrp.production'].search([('name', '=', origen_producto.origin)])
+                        record.nombre_proyecto = origen_producto_deep_level.product_id.name
+                else:
+                    record.nombre_proyecto = 'N/A'
 
             else:
                 record.nombre_proyecto = 'N/A'
@@ -305,6 +309,25 @@ class MrpBom(models.Model):
         for record in self:
             # _logger.critical(" COMPUTE TOTAL_M2 ")
             record.total_m2 = record.product_qty * record.m2
+
+
+    @api.onchange('product_qty')
+    def _onchange_product_qty(self):
+        for record in self:
+            if record.product_qty > 0:
+                record.cantidad_final = record.product_qty
+            else:
+                raise exceptions.UserError(
+                    "La Cantidad Inicial ingresada no puede ser 0 o menor. Elimine el registro si no lo requiere.")
+
+
+    @api.onchange('cantidad_final')
+    def _onchange_cantidad_final(self):
+        for record in self:
+            if record.cantidad_final < record.product_qty:
+                raise exceptions.UserError(
+                    "La Cantidad Final ingresada no puede ser menor a la cantidad inicial.")
+
 
 class MrpBomLine(models.Model):
     _name = 'mrp.bom.line'
@@ -357,6 +380,24 @@ class MrpBomLine(models.Model):
         for record in self:
             # _logger.critical(" COMPUTE TOTAL_M2 ")
             record.total_m2 = record.product_qty * record.m2
+
+    @api.onchange('product_qty')
+    def _onchange_product_qty(self):
+        for record in self:
+            if record.product_qty > 0:
+                record.cantidad_final = record.product_qty
+            else:
+                raise exceptions.UserError(
+                    "La Cantidad Inicial ingresada no puede ser 0 o menor. Elimine el registro si no lo requiere.")
+
+
+    @api.onchange('cantidad_final')
+    def _onchange_cantidad_final(self):
+        for record in self:
+            if record.cantidad_final < record.product_qty:
+                raise exceptions.UserError(
+                    "La Cantidad Final ingresada no puede ser menor a la cantidad inicial.")
+
 
 # TODO: Crear campo adicional en modelo bom_line para que me permita
 #  añadir la cantidad sin modificar nada de los productos asociados.

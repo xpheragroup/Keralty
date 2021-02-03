@@ -282,7 +282,7 @@
 <!--                                                <field name="product_id.image_128" string="Imágen" widget="image"/>-->
                                                 <field name="product_id" string="Área"/>
                                                 <field name="product_qty" />
-                                                <field name="cantidad_final" />
+                                                <field width="120px" name="cantidad_final" />
                                             </tree>
                                         </field>
                                     </group>
