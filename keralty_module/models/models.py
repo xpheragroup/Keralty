@@ -226,55 +226,33 @@ class FormularioCliente(models.Model):
     def action_confirmar_proyecto(self):
         if self.state == 'confirmed':
             raise exceptions.UserError("El formulario ya ha sido marcado como confirmado.")
-
-        usuarios_notifica = self.env['res.users'].search([('id', '=', 2)])
-
         self.state = 'confirmed'
-        # msg = _("El usuario %s ha confirmado un nuevo Formulario Cliente. %s<br/>" % self.env.user.name, self.name)
-        # base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        # base_url += '/web#id=%d&view_type=form&model=%s' % (self.id, self._name)
         msg = ('Formulario Cliente \"{}\", confirmado por el usuario: \"{}\". \n\n'.format(self.nombre_proyecto, self.env.user.name)) #base_url))
-        # self.env['mail.activity'].create({'res_id': self.id,
-        #                                 'res_model_id': self.env['ir.model'].search([('model', '=', 'keralty_module.formulario.cliente')]).id,
-        #                                 'activity_type_id': 4,
-        #                                 # 'user_id': [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-        #                                 # 'user_id': 2,
-        #                                 'user_id': usuarios_notifica.id,
-        #                                 'summary': 'Formulario de Cliente creado y confirmado para revisión por parte del área técnica.',
-        #                             })
-        # self.env['mail.message'].create({'message_type': "notification",
-        #                                  # "subtype": self.env.ref("mail.mt_comment").id,  # subject type
-        #                                  # 'subtype': 'mail.mt_comment',  # subject type
-        #                                  # 'subtype': 'mail.mt_comment',
-        #                                  'body': msg,
-        #                                  'subject': "Nuevo Formulario Cliente",
-        #                                  'partner_ids': [(4, 3, 1, 2)],
-        #                                  # partner to whom you send notification
-        #                                  })
-        notification_ids = [(0,0,
-                        # {
-                        #     'res_partner_id': self.env.user.partner_id.id,
-                        #     'notification_type': 'inbox'
-                        # },
-                        {
-                            'res_partner_id': self.env['res.partner'].search([('name', 'ilike', 'Catalina')], limit=1).id,
-                            'notification_type': 'inbox'
-                        }),
-                        (0,0,
-                        {
-                            'res_partner_id': self.env['res.partner'].search([('name', 'ilike', 'Izaquita')], limit=1).id,
-                            'notification_type': 'inbox'
-                        }
-                        )]
-        message_sent = self.message_post(body=msg, message_type="notification",
-                          subtype="mail.mt_comment",
-                          # author_id=self.env.user.partner_id.id,
-                          author_id=2,
-                          notification_ids=notification_ids)
+
+        # Buscar el grupo, buscar los usuarios del grupo, obtener el partner y guardarlo en notifications IDs
+        grupo_encontrado = self.env['res.groups'].search([('name', 'ilike', 'Usuarios Técnicos Keralty')], limit=1)
+
+        if grupo_encontrado:
+            _logger.critical(grupo_encontrado)
+            _logger.critical(grupo_encontrado.users)
+            notification_ids = []
+            for usuario_grupo in grupo_encontrado.users:
+                _logger.critical(usuario_grupo.partner_id)
+                notification_ids.append((0,0,
+                            {
+                                'res_partner_id': usuario_grupo.partner_id.id,
+                                'notification_type': 'inbox'
+                            }))
+            message_sent = self.message_post(body=msg, message_type="notification",
+                              subtype="mail.mt_comment",
+                              # author_id=self.env.user.partner_id.id,
+                              author_id=2,
+                              notification_ids=notification_ids)
+        else:
+            raise exceptions.UserError("No se encontró el grupo Usuarios Técnicos Keralty, se debe configurar para permitir la funcionalidad de alertas.")
+
 
         _logger.critical("Confirmar proyecto")
-        _logger.critical(self.env.user.partner_id)
-        _logger.critical(message_sent)
         return True
 # crear campo nombre_proyecto en ordenes de compra por proveedor
 
