@@ -1110,6 +1110,7 @@ class FormularioValidacion(models.Model):
                 find_vars_in_formula = re.findall('"(.+?)"', encuentra_formula_area.formula_aritmetica)
                 _logger.critical(find_vars_in_formula)
                 calculo_formula = encuentra_formula_area.formula_aritmetica
+                calculo_formula_final = encuentra_formula_area.formula_aritmetica
 
                 for variable in find_vars_in_formula:
                     if encuentra_formula_area.variable_derivada == 'cantidad':
@@ -1117,9 +1118,11 @@ class FormularioValidacion(models.Model):
                             if encuentra_formula_area.area_criterio_independiente:
                                 if variable in area_cliente.product_id.name:
                                     calculo_formula = calculo_formula.replace(variable, str(area_cliente.product_qty))
+                                    calculo_formula_final = calculo_formula_final.replace(variable, str(area_cliente.cantidad_final))
                             if encuentra_formula_area.campo_criterio_independiente:
                                 variable_texto = 'self.formulario_cliente.' + variable
                                 calculo_formula = calculo_formula.replace(variable, str(eval(variable_texto)))
+                                calculo_formula_final = calculo_formula_final.replace(variable, str(eval(variable_texto)))
                                 _logger.critical(variable_texto)
                                 _logger.critical(calculo_formula)
 
@@ -1128,8 +1131,10 @@ class FormularioValidacion(models.Model):
                         raise exceptions.UserError("Una o más áreas dependientes no se han encontrado, por favor verifique que el área dependiente se encuentre en el listado de Áreas Cliente. Área: (" + variable + ")")
 
                 calculo_formula = calculo_formula.replace('"', '')
+                calculo_formula_final = calculo_formula_final.replace('"', '')
                 _logger.critical(eval(calculo_formula))  # 1.4
                 area_derivada.product_qty = eval(calculo_formula)
+                area_derivada.cantidad_final = eval(calculo_formula_final)
 
 
 
