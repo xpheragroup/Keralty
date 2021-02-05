@@ -163,8 +163,8 @@ class FormularioCliente(models.Model):
         for sede_product_template in self.sede_seleccionada:
             for area in sede_product_template.bom_ids:
                 for linea_bom in area.bom_line_ids:
-                    #for producto_seleccionado in self.producto_seleccionado:
-                        #if producto_seleccionado.name in linea_bom.display_name:
+                    for producto_seleccionado in self.producto_seleccionado:
+                        if producto_seleccionado.name in linea_bom.display_name:
                             if "Cliente" in linea_bom.product_id.categ_id.name:
                                 if total_bom_line_ids:
                                     total_bom_line_ids += linea_bom
