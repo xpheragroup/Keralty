@@ -168,18 +168,19 @@ class FormularioCliente(models.Model):
                     # _logger.warning(linea_bom)
                     for producto_seleccionado in self.producto_seleccionado:
                         # if producto_seleccionado.name in linea_bom.display_name:\
-                        if producto_seleccionado.name in linea_bom.bom_product_template_attribute_value_ids.name:
+                        if linea_bom.bom_product_template_attribute_value_ids:
+                            if producto_seleccionado.name in linea_bom.bom_product_template_attribute_value_ids.name:
 
-                            # _logger.warning('LINEA BOOOOOM!! producto seleccionado Y BOM PRODUCT TEMPLATE ATTRIBUTE VALUE IDS')
-                            # _logger.warning(producto_seleccionado)
-                            # _logger.warning(linea_bom.bom_product_template_attribute_value_ids)
-                            # _logger.warning(linea_bom)
+                                # _logger.warning('LINEA BOOOOOM!! producto seleccionado Y BOM PRODUCT TEMPLATE ATTRIBUTE VALUE IDS')
+                                # _logger.warning(producto_seleccionado)
+                                # _logger.warning(linea_bom.bom_product_template_attribute_value_ids)
+                                # _logger.warning(linea_bom)
 
-                            if "Cliente" in linea_bom.product_id.categ_id.name:
-                                if total_bom_line_ids:
-                                    total_bom_line_ids += linea_bom
-                                else:
-                                    total_bom_line_ids = linea_bom
+                                if "Cliente" in linea_bom.product_id.categ_id.name:
+                                    if total_bom_line_ids:
+                                        total_bom_line_ids += linea_bom
+                                    else:
+                                        total_bom_line_ids = linea_bom
                 area.bom_line_ids = None
                 area.bom_line_ids = total_bom_line_ids
 
@@ -497,6 +498,10 @@ class FormularioValidacion(models.Model):
         _logger.critical(self.formulario_cliente.areas_asociadas_sede)
         if self.formulario_cliente.areas_asociadas_sede:
             self.areas_cliente = self.formulario_cliente.areas_asociadas_sede
+
+        # Cargar Áreas Derivadas automáticamente
+
+
 
         warning = {
             'title': "Sede Seleccionada PRINT: {}".format(
