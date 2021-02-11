@@ -495,11 +495,45 @@ class FormularioValidacion(models.Model):
     def _onchange_formulario_cliente(self):
         res = {}
         objetoBusqueda = None
-        _logger.critical(self.formulario_cliente.areas_asociadas_sede)
+        # _logger.critical(self.formulario_cliente.areas_asociadas_sede)
         if self.formulario_cliente.areas_asociadas_sede:
             self.areas_cliente = self.formulario_cliente.areas_asociadas_sede
 
         # Cargar Áreas Derivadas automáticamente
+
+        self.areas_derivadas = None
+        self.areas_diseño = None
+        total_bom_line_ids_derivada = None
+        total_bom_line_ids_disenio = None
+
+        for sede_product_template in self.formulario_cliente.sede_seleccionada:
+            for area in sede_product_template.bom_ids:
+                for linea_bom in area.bom_line_ids:
+                    # _logger.warning('LINEA BOOOOOM!!')
+                    # _logger.warning(linea_bom)
+                    for producto_seleccionado in self.formulario_cliente.producto_seleccionado:
+                        # if producto_seleccionado.name in linea_bom.display_name:\
+                        if linea_bom.bom_product_template_attribute_value_ids:
+                            if producto_seleccionado.name in linea_bom.bom_product_template_attribute_value_ids.name:
+
+                                if "Derivada" in linea_bom.child_bom_id.product_tmpl_id.categ_id.name:
+                                    if total_bom_line_ids_derivada:
+                                        total_bom_line_ids_derivada += linea_bom.child_bom_id
+                                    else:
+                                        total_bom_line_ids_derivada = linea_bom.child_bom_id
+
+                                if "Diseño" in linea_bom.child_bom_id.product_tmpl_id.categ_id.name:
+                                    if total_bom_line_ids_disenio:
+                                        total_bom_line_ids_disenio += linea_bom.child_bom_id
+                                    else:
+                                        total_bom_line_ids_disenio = linea_bom.child_bom_id
+
+                self.areas_derivadas = None
+                self.areas_derivadas |= total_bom_line_ids_derivada
+
+                self.areas_diseño = None
+                self.areas_diseño |= total_bom_line_ids_disenio
+
 
 
 
