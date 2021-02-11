@@ -163,32 +163,36 @@ class FormularioCliente(models.Model):
 
         for sede_product_template in self.sede_seleccionada:
             for area in sede_product_template.bom_ids:
-                for linea_bom in area.bom_line_ids:
-                    # _logger.warning('LINEA BOOOOOM!!')
-                    # _logger.warning(linea_bom)
-                    for producto_seleccionado in self.producto_seleccionado:
-                        # if producto_seleccionado.name in linea_bom.display_name:\
-                        if linea_bom.bom_product_template_attribute_value_ids:
-                            if producto_seleccionado.name in linea_bom.bom_product_template_attribute_value_ids.name:
+                if area.bom_line_ids == 1:
+                    for linea_bom in area.bom_line_ids:
+                        # _logger.warning('LINEA BOOOOOM!!')
+                        # _logger.warning(linea_bom)
+                        for producto_seleccionado in self.producto_seleccionado:
+                            # if producto_seleccionado.name in linea_bom.display_name:\
+                            if linea_bom.bom_product_template_attribute_value_ids:
+                                if producto_seleccionado.name in linea_bom.bom_product_template_attribute_value_ids.name:
 
-                                # _logger.warning('LINEA BOOOOOM!! producto seleccionado Y BOM PRODUCT TEMPLATE ATTRIBUTE VALUE IDS')
-                                # _logger.warning(producto_seleccionado)
-                                # _logger.warning(linea_bom.bom_product_template_attribute_value_ids)
-                                # _logger.warning(linea_bom)
+                                    # _logger.warning('LINEA BOOOOOM!! producto seleccionado Y BOM PRODUCT TEMPLATE ATTRIBUTE VALUE IDS')
+                                    # _logger.warning(producto_seleccionado)
+                                    # _logger.warning(linea_bom.bom_product_template_attribute_value_ids)
+                                    # _logger.warning(linea_bom)
 
-                                if "Cliente" in linea_bom.product_id.categ_id.name:
-                                    if total_bom_line_ids:
-                                        total_bom_line_ids += linea_bom
-                                    else:
-                                        total_bom_line_ids = linea_bom
-                area.bom_line_ids = None
-                area.bom_line_ids = total_bom_line_ids
+                                    if "Cliente" in linea_bom.product_id.categ_id.name:
+                                        if total_bom_line_ids:
+                                            total_bom_line_ids += linea_bom
+                                        else:
+                                            total_bom_line_ids = linea_bom
+                    area.bom_line_ids = None
+                    area.bom_line_ids = total_bom_line_ids
 
-                self.areas_asociadas_sede |= area.bom_line_ids
+                    self.areas_asociadas_sede |= area.bom_line_ids
 
-                if not total_bom_line_ids:
-                    raise exceptions.UserError("No se encuentra ninguna asociación entre el Producto y la Sede seleccionados.")
-                # self.areas_asociadas_sede |= bom_created
+                    if not total_bom_line_ids:
+                        raise exceptions.UserError("No se encuentra ninguna asociación entre el Producto y la Sede seleccionados.")
+                    # self.areas_asociadas_sede |= bom_created
+                else:
+                    raise exceptions.UserError("La Sede seleccionada ' + area.display_name + ' debe tener una lista de materiales.")
+
 
 
         for linea_bom in self.areas_asociadas_sede:
