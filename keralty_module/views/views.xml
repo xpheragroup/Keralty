@@ -232,39 +232,46 @@
                         <field name="especificaciones_adicionales" />
                     </group>
                     <group string="Ocupación">
-                        <span class="oe_inline">Por favor diligencie la distribución de ocupación para cada una de las categorías.</span>
+                        <span style="width: 100%;">Por favor diligencie la distribución de ocupación para cada una de las categorías.</span>
+                        <br/>
+                        <br/>
+                        <br/>
                         <h3>Usuarios:</h3>
                         <br/>
-                        <span class="oe_inline">Distribución por género</span>
+                        <span class="oe_inline"><b>Distribución por género</b></span>
                         <br/>
-                        <field name="usuarios_femenino" />
-                        <field name="usuarios_masculino" />
-                        <span class="oe_inline">Distribución por grupo etario</span>
+                        <field style="font-weight: normal;" name="usuarios_femenino" />
+                        <field style="font-weight: normal;" name="usuarios_masculino" />
+                        <span class="oe_inline"><b>Distribución por grupo etario</b></span>
                         <br/>
-                        <field name="usuarios_menores_10_anos" />
-                        <field name="usuarios_entre_10_19_anos" />
-                        <field name="usuarios_entre_20_59_anos" />
-                        <field name="usuarios_mayores_59_anos" />
+                        <field style="font-weight: normal;" name="usuarios_menores_10_anos" />
+                        <field style="font-weight: normal;" name="usuarios_entre_10_19_anos" />
+                        <field style="font-weight: normal;" name="usuarios_entre_20_59_anos" />
+                        <field style="font-weight: normal;" name="usuarios_mayores_59_anos" />
+                        <br/>
+                        <br/>
                         <h3>Empleados: </h3>
                         <br/>
-                        <span class="oe_inline">Distribución por género</span>
+                        <span class="oe_inline"><b>Distribución por género</b></span>
                         <br/>
-                        <field name="empleados_femenino" />
-                        <field name="empleados_masculino" />
-                        <span class="oe_inline">Distribución por tipo de labor</span>
+                        <field style="font-weight: normal; !important" name="empleados_femenino" />
+                        <field style="font-weight: normal;" name="empleados_masculino" />
+                        <span class="oe_inline"><b>Distribución por tipo de labor</b></span>
                         <br/>
-                        <field name="personal_administrativo" />
-                        <field name="personal_asistencial" />
+                        <field style="font-weight: normal;" name="personal_administrativo" />
+                        <field style="font-weight: normal;" name="personal_asistencial" />
+                        <br/>
+                        <br/>
                         <h3>Terceros: </h3>
                         <br/>
-                        <span class="oe_inline">Distribución por género</span>
+                        <span class="oe_inline"><b>Distribución por género</b></span>
                         <br/>
-                        <field name="terceros_femenino" />
-                        <field name="terceros_masculino" />
-                        <span class="oe_inline">Distribución por servicios a subcontratar</span>
+                        <field style="font-weight: normal; !important" name="terceros_femenino" />
+                        <field style="font-weight: normal; !important" name="terceros_masculino" />
+                        <span class="oe_inline"><b>Distribución por servicios a subcontratar</b></span>
                         <br/>
-                        <field name="servicios_generales" />
-                        <field name="seguridad" />
+                        <field style="font-weight: normal; !important" name="servicios_generales" />
+                        <field style="font-weight: normal; !important" name="seguridad" />
 
                     </group>
                     <notebook>
