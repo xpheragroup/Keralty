@@ -191,7 +191,7 @@ class FormularioCliente(models.Model):
                         raise exceptions.UserError("No se encuentra ninguna asociación entre el Producto y la Sede seleccionados.")
                     # self.areas_asociadas_sede |= bom_created
                 else:
-                    raise exceptions.UserError("La Sede seleccionada " + area.display_name + " debe tener una lista de materiales.")
+                    raise exceptions.UserError("La Sede seleccionada \"" + area.display_name + "\" debe tener (1) una lista de materiales. Actual: " + str(len(area.bom_line_ids)))
 
 
 
