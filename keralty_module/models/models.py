@@ -163,7 +163,7 @@ class FormularioCliente(models.Model):
 
         for sede_product_template in self.sede_seleccionada:
             for area in sede_product_template.bom_ids:
-                if len(area.bom_line_ids) == 1:
+                # if len(area.bom_line_ids) == 1:
                     for linea_bom in area.bom_line_ids:
                         # _logger.warning('LINEA BOOOOOM!!')
                         # _logger.warning(linea_bom)
@@ -190,8 +190,8 @@ class FormularioCliente(models.Model):
                     if not total_bom_line_ids:
                         raise exceptions.UserError("No se encuentra ninguna asociación entre el Producto y la Sede seleccionados.")
                     # self.areas_asociadas_sede |= bom_created
-                else:
-                    raise exceptions.UserError("La Sede seleccionada \"" + area.display_name + "\" debe tener (1) una lista de materiales. Actual: " + str(len(area.bom_line_ids)))
+                # else:
+                #     raise exceptions.UserError("La Sede seleccionada \"" + area.display_name + "\" debe tener (1) una lista de materiales. Actual: " + str(len(area.bom_line_ids)))
 
 
 
