@@ -232,8 +232,7 @@
                         <field name="especificaciones_adicionales" />
                     </group>
                     <group string="Ocupación">
-                        <span class="oe_inline">A continuación encontrará la información de las áreas sugeridas para el centro médico. Teniendo en cuenta las proyecciones de crecimiento, en la columna "Valor inicial", se debe ingresar la ocupación esperada para el momento de apertura del centro médico. En la columna "Valor final", se debe ingresar la ocupación total esperada para el centro médico.</span>
-                        <br/>
+                        <span class="oe_inline">Por favor diligencie la distribución de ocupación para cada una de las categorías.</span>
                         <h3>Usuarios:</h3>
                         <br/>
                         <span class="oe_inline">Distribución por género</span>
