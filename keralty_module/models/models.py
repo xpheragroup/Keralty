@@ -163,7 +163,7 @@ class FormularioCliente(models.Model):
 
         for sede_product_template in self.sede_seleccionada:
             for area in sede_product_template.bom_ids:
-                if area.bom_line_ids == 1:
+                if len(area.bom_line_ids) == 1:
                     for linea_bom in area.bom_line_ids:
                         # _logger.warning('LINEA BOOOOOM!!')
                         # _logger.warning(linea_bom)
