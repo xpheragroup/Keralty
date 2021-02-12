@@ -382,7 +382,8 @@
                                 <field name="areas_cliente" widget="many2many">
                                     <tree string="Áreas" editable="top">
                                         <field name="company_id" invisible="1"/>
-                                        <field name="product_id" string="Área"/>
+                                        <field width="300px"  name="product_id" string="Área"  invisible="1"/>
+                                        <field width="300px"  name="product_name_only" string="Área"/>
                                         <field name="product_qty" />
                                         <field name="cantidad_final" />
                                         <field name="m2" />
@@ -396,7 +397,8 @@
                                 <field name="areas_derivadas" widget="many2many">
                                     <tree string="Áreas" editable="top">
                                         <field name="company_id" invisible="1"/>
-                                        <field name="product_tmpl_id" string="Área"/>
+                                        <field width="300px"  name="product_tmpl_id" string="Área"  invisible="1"/>
+                                        <field width="300px"  name="product_name_only" string="Área"/>
                                         <field name="product_qty" />
                                         <field name="cantidad_final" />
                                         <field name="m2" />
@@ -410,7 +412,8 @@
                                 <field name="areas_diseño" widget="many2many">
                                     <tree string="Áreas" editable="top">
                                         <field name="company_id" invisible="1"/>
-                                        <field name="product_tmpl_id" string="Área"/>
+                                        <field width="300px"  name="product_tmpl_id" string="Área"  invisible="1"/>
+                                        <field width="300px"  name="product_name_only" string="Área"/>
                                         <field name="product_qty" />
                                         <field name="cantidad_final" />
                                         <field name="m2" />

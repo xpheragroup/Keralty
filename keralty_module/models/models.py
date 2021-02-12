@@ -294,6 +294,7 @@ class MrpBom(models.Model):
     cantidad_final = fields.Float(
         'Cantidad Final', default=1.0,
         digits='Unit of Measure',)
+    product_name_only = fields.Char(string="Nombre", compute='_compute_product_name_only')
 
     @api.depends('m2','total_m2')
     def _compute_total_m2(self):
@@ -320,6 +321,15 @@ class MrpBom(models.Model):
                     "La Cantidad Final ingresada no puede ser menor a la cantidad inicial.")
 
 
+    @api.depends('product_name_only')
+    def _compute_product_name_only(self):
+        for record in self:
+            if record.product_id:
+                record.product_name_only = record.product_id.name
+            if record.product_tmpl_id:
+                record.product_name_only = record.product_tmpl_id.name
+
+
 class MrpBomLine(models.Model):
     _name = 'mrp.bom.line'
     _inherit = 'mrp.bom.line'
@@ -329,12 +339,12 @@ class MrpBomLine(models.Model):
     total_m2 = fields.Float('Total', default=1.0, digits=(16, 2), readonly=True, group_operator="sum",
                             compute='_compute_total_m2',)
     product_image = fields.Binary(string="Imágen Área", compute='_compute_product_image')
-    product_name_only = fields.Char(string="Nombre", compute='_compute_product_name_only')
     cantidad_final = fields.Float(
         'Cantidad Final', default=1.0,
         digits='Unit of Measure',)
 
 
+    product_name_only = fields.Char(string="Nombre", compute='_compute_product_name_only')
     @api.depends('product_name_only')
     def _compute_product_name_only(self):
         for record in self:
@@ -1176,28 +1186,35 @@ class FormularioValidacion(models.Model):
                 calculo_formula_final = encuentra_formula_area.formula_aritmetica
 
                 for variable in find_vars_in_formula:
-                    if encuentra_formula_area.variable_derivada == 'cantidad':
-                        for area_cliente in self.areas_cliente:
-                            if encuentra_formula_area.area_criterio_independiente:
-                                if variable in area_cliente.product_id.name:
-                                    calculo_formula = calculo_formula.replace(variable, str(area_cliente.product_qty))
-                                    calculo_formula_final = calculo_formula_final.replace(variable, str(area_cliente.cantidad_final))
-                            if encuentra_formula_area.campo_criterio_independiente:
-                                variable_texto = 'self.formulario_cliente.' + variable
-                                calculo_formula = calculo_formula.replace(variable, str(eval(variable_texto)))
-                                calculo_formula_final = calculo_formula_final.replace(variable, str(eval(variable_texto)))
-                                _logger.critical(variable_texto)
-                                _logger.critical(calculo_formula)
+                    for area_cliente in self.areas_cliente:
+                        if encuentra_formula_area.area_criterio_independiente:
+                            if variable in area_cliente.product_id.name:
+                                calculo_formula = calculo_formula.replace(variable, str(area_cliente.product_qty))
+                                calculo_formula_final = calculo_formula_final.replace(variable, str(area_cliente.cantidad_final))
+                        if encuentra_formula_area.campo_criterio_independiente:
+                            variable_texto = 'self.formulario_cliente.' + variable
+                            calculo_formula = calculo_formula.replace(variable, str(eval(variable_texto)))
+                            calculo_formula_final = calculo_formula_final.replace(variable, str(eval(variable_texto)))
+                            _logger.critical(variable_texto)
+                            _logger.critical(calculo_formula)
 
                 for variable in find_vars_in_formula:
                     if variable in calculo_formula:
                         raise exceptions.UserError("Una o más áreas dependientes no se han encontrado, por favor verifique que el área dependiente se encuentre en el listado de Áreas Cliente. Área: (" + variable + ")")
 
-                calculo_formula = calculo_formula.replace('"', '')
-                calculo_formula_final = calculo_formula_final.replace('"', '')
-                _logger.critical(eval(calculo_formula))  # 1.4
-                area_derivada.product_qty = eval(calculo_formula)
-                area_derivada.cantidad_final = eval(calculo_formula_final)
+                if encuentra_formula_area.variable_derivada == 'cantidad':
+                    calculo_formula = calculo_formula.replace('"', '')
+                    calculo_formula_final = calculo_formula_final.replace('"', '')
+                    _logger.critical(eval(calculo_formula))  # 1.4
+                    area_derivada.product_qty = eval(calculo_formula)
+                    area_derivada.cantidad_final = eval(calculo_formula_final)
+
+                if encuentra_formula_area.variable_derivada == 'area':
+                    calculo_formula = calculo_formula.replace('"', '')
+                    calculo_formula_final = calculo_formula_final.replace('"', '')
+                    _logger.critical(eval(calculo_formula))  # 1.4
+                    area_derivada.m2 = eval(calculo_formula)
+                    area_derivada.total_m2 = area_derivada.m2 * area_derivada.product_qty
 
 
 
