@@ -283,13 +283,14 @@
                                     <span style="width: 100%;">A continuación encontrará la información de las áreas sugeridas para la iniciativa solicitada. En caso de contar con proyecciones de crecimiento de infraestructura, ingrese en “Valor Inicial” la cantidad de espacios por cada área con la que iniciará la operación del proyecto, y en “Valor Final”, la cantidad total proyectada en cada caso. Si no se proyectará crecimiento, ingrese la cantidad de espacios a solicitar únicamente en la columna “Valor Inicial”</span>
                                     <group class="invoice-residual-view">
                                         <!--field name="move_raw_ids"/-->
-                                        <field name="areas_asociadas_sede" widget="many2many">
+                                        <field string="" name="areas_asociadas_sede" widget="many2many">
                                             <tree string="Áreas" editable="top" create="true" edit="false">
                                                 <field name="company_id" invisible="1"/>
                                                 <field width="60px"  name="product_image" options="{'size':[0,90]}" widget="image"/>
 <!--                                                <field name="attachments_count" string="Cantidad de Archivos"/>-->
 <!--                                                <field name="product_id.image_128" string="Imágen" widget="image"/>-->
-                                                <field width="300px"  name="product_id" string="Área"/>
+                                                <field width="300px"  name="product_id" string="Área"  invisible="1"/>
+                                                <field width="300px"  name="product_name_only" string="Área"/>
                                                 <field width="90px" name="product_qty" />
                                                 <field width="120px" name="cantidad_final" />
                                             </tree>
@@ -419,8 +420,8 @@
                             </group>
                         </page>
                         <page class="oe_highlight" string="Total" name="Total">
-                            <group class="invoice-residual-view">
-                                <group class="invoice-residual-view">
+                            <group class="">
+                                <group class="">
                                     <field name="porcentaje_pasillos" />
                                     <field name="total_m2_areas_cliente" />
                                     <field name="total_m2_areas_derivadas" />

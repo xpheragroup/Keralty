@@ -329,9 +329,19 @@ class MrpBomLine(models.Model):
     total_m2 = fields.Float('Total', default=1.0, digits=(16, 2), readonly=True, group_operator="sum",
                             compute='_compute_total_m2',)
     product_image = fields.Binary(string="Imágen Área", compute='_compute_product_image')
+    product_name_only = fields.Char(string="Nombre", compute='_compute_product_name_only')
     cantidad_final = fields.Float(
         'Cantidad Final', default=1.0,
         digits='Unit of Measure',)
+
+
+    @api.depends('product_name_only')
+    def _compute_product_name_only(self):
+        for record in self:
+            if record.product_id:
+                record.product_name_only = record.product_id.name
+
+
 
 
     @api.depends('product_image')
