@@ -278,6 +278,9 @@
                         <!--<templates>-->
                             <!--<t t-foreach="empresa_seleccionada" t-as="empresa">-->
                                 <page class="oe_highlight" string="Áreas Cliente" name  ="Áreas Cliente">
+                                    <span style="width: 100%;"><b>Selección de áreas</b></span>
+                                    <br />
+                                    <span style="width: 100%;">A continuación encontrará la información de las áreas sugeridas para la iniciativa solicitada. En caso de contar con proyecciones de crecimiento de infraestructura, ingrese en “Valor Inicial” la cantidad de espacios por cada área con la que iniciará la operación del proyecto, y en “Valor Final”, la cantidad total proyectada en cada caso. Si no se proyectará crecimiento, ingrese la cantidad de espacios a solicitar únicamente en la columna “Valor Inicial”</span>
                                     <group class="invoice-residual-view">
                                         <!--field name="move_raw_ids"/-->
                                         <field name="areas_asociadas_sede" widget="many2many">
@@ -448,7 +451,7 @@
             </xpath>
         </field>
     </record>
-    <!-- Modificación a la vista purchase_order_tree -->
+    <!-- Modificación a la vista purchase_order_tree solicitud de cotización -->
     <record id="purchase_order_tree_inherit_field_proyecto" model="ir.ui.view">
         <field name="name">purchase.order.view.inherited.field.proyecto</field>
         <field name="model">purchase.order</field>
@@ -457,6 +460,19 @@
           <xpath expr="//field[@name='date_order']" position="after">
             <field name="nombre_proyecto"/>
           </xpath>
+          <xpath expr="//field[@name='origin']" position="replace"/>
+        </field>
+    </record>
+    <!-- Modificación a la vista purchase_order_view_tree orden de compra -->
+    <record id="purchase_order_tree_inherit_field_proyecto_asociado" model="ir.ui.view">
+        <field name="name">purchase.order.view.inherited.field.proyecto_asociado</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree" />
+        <field name="arch" type="xml">
+          <xpath expr="//field[@name='date_approve']" position="after">
+            <field name="nombre_proyecto"/>
+          </xpath>
+          <xpath expr="//field[@name='origin']" position="replace"/>
         </field>
     </record>
 <!--
