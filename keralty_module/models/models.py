@@ -464,12 +464,12 @@ class FormularioValidacion(models.Model):
                     # readonly=True, states={'draft': [('readonly', False)]},)
 
     areas_derivadas = fields.Many2many(string="Áreas Derivadas",
-                    comodel_name='mrp.bom',
-                    relation="validacion_areas_derivadas",
+                    comodel_name='mrp.bom.line',
+                    relation="validacion_areas_derivadas_line",
                     # column1="product_id",
                     # column2="product_qty",
                     help="Listado de áreas derivadas de la solicitud del cliente.",
-                    domain="[('product_tmpl_id.categ_id.name','ilike','Derivada')]",
+                    domain="[('product_id.categ_id.name','ilike','Derivada')]",
                     #domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
                     required=True,
                     copy=True,)
@@ -477,12 +477,12 @@ class FormularioValidacion(models.Model):
                     #readonly=True, states={'draft': [('readonly', False)]},)
 
     areas_diseño = fields.Many2many(string="Áreas Diseño",
-                    comodel_name='mrp.bom',
-                    relation="validacion_areas_diseno",
+                    comodel_name='mrp.bom.line',
+                    relation="validacion_areas_diseno_line",
                     # column1="product_id",
                     # column2="product_qty",
                     help="Listado de áreas de diseño de la solicitud del cliente.",
-                    domain="[('product_tmpl_id.categ_id.name','ilike','Diseño')]",
+                    domain="[('product_id.categ_id.name','ilike','Diseño')]",
                     #domain="['|',('parent_product_tmpl_id','in',sede_seleccionada),('product_id.attribute_line_ids.id','=',empresa_seleccionada)]",
                     required=True,
                     copy=True,)
@@ -540,17 +540,19 @@ class FormularioValidacion(models.Model):
                         if linea_bom.bom_product_template_attribute_value_ids:
                             if producto_seleccionado.name in linea_bom.bom_product_template_attribute_value_ids.name:
 
-                                if "Derivada" in linea_bom.child_bom_id.product_tmpl_id.categ_id.name:
+                                # if "Derivada" in linea_bom.child_bom_id.product_tmpl_id.categ_id.name:
+                                if "Derivada" in linea_bom.product_id.categ_id.name:
                                     if total_bom_line_ids_derivada:
-                                        total_bom_line_ids_derivada += linea_bom.child_bom_id
+                                        total_bom_line_ids_derivada += linea_bom#.child_bom_id
                                     else:
-                                        total_bom_line_ids_derivada = linea_bom.child_bom_id
+                                        total_bom_line_ids_derivada = linea_bom#.child_bom_id
 
-                                if "Diseño" in linea_bom.child_bom_id.product_tmpl_id.categ_id.name:
+                                #if "Diseño" in linea_bom.child_bom_id.product_tmpl_id.categ_id.name:
+                                if "Diseño" in linea_bom.product_id.categ_id.name:
                                     if total_bom_line_ids_disenio:
-                                        total_bom_line_ids_disenio += linea_bom.child_bom_id
+                                        total_bom_line_ids_disenio += linea_bom#.child_bom_id
                                     else:
-                                        total_bom_line_ids_disenio = linea_bom.child_bom_id
+                                        total_bom_line_ids_disenio = linea_bom#.child_bom_id
 
                 self.areas_derivadas = None
                 self.areas_derivadas |= total_bom_line_ids_derivada
@@ -1158,14 +1160,16 @@ class FormularioValidacion(models.Model):
                     # area_ciente.total_m2 = area_ciente.product_qty * area_ciente.m2
 
         for area_derivada in self.areas_derivadas:
-            for bom_line in area_derivada.bom_line_ids:
+            # for bom_line in area_derivada.bom_line_ids:
+            for bom_line in area_derivada.child_line_ids:
                 # TODO: Validar que la variante sea la misma del área seleccionada para traer el valor de M2 correcto.
                 if "Área" in bom_line.product_id.name or "Area" in bom_line.product_id.name:
                     area_derivada.m2 = bom_line.product_qty
                     self.total_m2_areas += area_derivada.m2 * area_derivada.product_qty
 
             # Consultar si el área derivada tiene formulación creada
-            encuentra_formulas_area = self.env['keralty_module.calculos'].search([('area_derivada.name', '=', area_derivada.product_tmpl_id.name)], order='id asc')
+            # encuentra_formulas_area = self.env['keralty_module.calculos'].search([('area_derivada.name', '=', area_derivada.product_tmpl_id.name)], order='id asc')
+            encuentra_formulas_area = self.env['keralty_module.calculos'].search([('area_derivada.name', '=', area_derivada.product_id.name)], order='id asc')
 
             if len(encuentra_formulas_area) > 0:
                 for formula_area_encontrada in encuentra_formulas_area:
@@ -1212,7 +1216,8 @@ class FormularioValidacion(models.Model):
 
         for area_diseño in self.areas_diseño:
             # _logger.warning(area_derivada.bom_line_ids)
-            for bom_line in area_diseño.bom_line_ids:
+            # for bom_line in area_diseño.bom_line_ids:
+            for bom_line in area_diseño.child_line_ids:
                 # _logger.critical(bom_line.product_id.name)
                 # for child_bom in bom_line.child_line_ids:
                 # _logger.critical(child_bom.product_id.name)
