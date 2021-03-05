@@ -212,7 +212,7 @@ class FormularioCliente(models.Model):
 
     def action_validar_proyecto(self):
         self.state = 'draft'
-        _logger.critical("Validar proyecto")
+        # _logger.critical("Validar proyecto")
         return True
 
     def action_confirmar_proyecto(self):
@@ -225,11 +225,11 @@ class FormularioCliente(models.Model):
         grupo_encontrado = self.env['res.groups'].search([('name', 'ilike', 'Usuarios Técnicos Keralty')], limit=1)
 
         if grupo_encontrado:
-            _logger.critical(grupo_encontrado)
-            _logger.critical(grupo_encontrado.users)
+            # _logger.critical(grupo_encontrado)
+            # _logger.critical(grupo_encontrado.users)
             notification_ids = []
             for usuario_grupo in grupo_encontrado.users:
-                _logger.critical(usuario_grupo.partner_id)
+                # _logger.critical(usuario_grupo.partner_id)
                 notification_ids.append((0,0,
                             {
                                 'res_partner_id': usuario_grupo.partner_id.id,
@@ -244,7 +244,7 @@ class FormularioCliente(models.Model):
             raise exceptions.UserError("No se encontró el grupo Usuarios Técnicos Keralty, se debe configurar para permitir la funcionalidad de alertas.")
 
 
-        _logger.critical("Confirmar proyecto")
+        # _logger.critical("Confirmar proyecto")
         return True
 # crear campo nombre_proyecto en ordenes de compra por proveedor
 
@@ -259,17 +259,17 @@ class PurchaseOrder(models.Model):
     def _compute_nombre_proyecto(self):
         for record in self:
             # _logger.critical(" COMPUTE TOTAL_M2 ")
-            _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
-            _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
-            _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
-            _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
+            # _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
+            # _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
+            # _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
+            # _logger.critical("PurchaseOrder _compute_nombre_proyecto ")
             if record.origin:
                 origin_split = record.origin.split(',')
-                _logger.critical(origin_split)
+                # _logger.critical(origin_split)
                 # for origen in origin_split:
                 referencia_origen = self.env['mrp.production'].search([('name', '=', origin_split[-1].strip())])
                 origen_producto = self.env['mrp.production'].search([('name', '=', referencia_origen.origin)])
-                _logger.critical(origen_producto.product_id.name)
+                # _logger.critical(origen_producto.product_id.name)
                 if origen_producto:
                     record.nombre_proyecto = origen_producto.product_id.name
 
@@ -577,7 +577,7 @@ class FormularioValidacion(models.Model):
     def action_realizar(self):
         total_boom_line_ids = None
 
-        _logger.critical("Realizar proyecto")
+        # _logger.critical("Realizar proyecto")
         '''
             TODO:
                 Traer todas las áreas diligenciadas del formulario de falicación
@@ -659,8 +659,8 @@ class FormularioValidacion(models.Model):
             else:
                 total_boom_line_ids += self.areas_cliente
 
-            _logger.critical("BOM: AREAS CLIENTE: ")
-            _logger.critical(self.areas_cliente)
+            # _logger.critical("BOM: AREAS CLIENTE: ")
+            # _logger.critical(self.areas_cliente)
 
             for area_derivada in self.areas_derivadas:
                 # _logger.critical("BOM: AREAS DERIVADAS: ")
@@ -668,10 +668,10 @@ class FormularioValidacion(models.Model):
                 # _logger.critical(area_derivada)
                 # area_derivada.product_tmpl_id = product_template.id # Cambia el producto asociado, no sirve, se debe duplicar
                 # Create Product
-                _logger.critical("BOM: AREAS DERIVADAS: ")
-                _logger.critical(area_derivada)
-                _logger.critical(area_derivada.product_tmpl_id)
-                _logger.critical(area_derivada.product_id)
+                # _logger.critical("BOM: AREAS DERIVADAS: ")
+                # _logger.critical(area_derivada)
+                # _logger.critical(area_derivada.product_tmpl_id)
+                # _logger.critical(area_derivada.product_id)
 
                 BomLine.create({
                     'bom_id': bom_created.id,
@@ -688,10 +688,10 @@ class FormularioValidacion(models.Model):
             for area_diseño in self.areas_diseño:
                 # area_diseño.product_tmpl_id = product_template.id
                 # Create Product
-                _logger.critical("BOM: AREAS DISEÑO: ")
-                _logger.critical(area_diseño)
-                _logger.critical(area_diseño.product_tmpl_id)
-                _logger.critical(area_diseño.product_id)
+                # _logger.critical("BOM: AREAS DISEÑO: ")
+                # _logger.critical(area_diseño)
+                # _logger.critical(area_diseño.product_tmpl_id)
+                # _logger.critical(area_diseño.product_id)
 
                 BomLine.create({
                     'bom_id': bom_created.id,
@@ -715,11 +715,11 @@ class FormularioValidacion(models.Model):
                     'product_qty': bom_without_attrs.product_qty,
                 })
 
-            _logger.critical('-------------------------------')
-            _logger.critical('--------TOTAL BOM IDs----------')
-            _logger.critical('-------------------------------')
-            _logger.critical(total_boom_line_ids)
-            _logger.critical('-------------------------------')
+            # _logger.critical('-------------------------------')
+            # _logger.critical('--------TOTAL BOM IDs----------')
+            # _logger.critical('-------------------------------')
+            # _logger.critical(total_boom_line_ids)
+            # _logger.critical('-------------------------------')
 
 
             self.state = 'done'
@@ -748,10 +748,10 @@ class FormularioValidacion(models.Model):
                 raise exceptions.UserError("Ya se encuentran creadas las órdenes de producción iniciales para éste proyecto.")
 
             bom_id = self.env['mrp.bom'].search([('product_tmpl_id', '=', product_template.id)], order='id asc')
-            _logger.critical('--------PRODUCTO ENCONTRADO----------')
-            _logger.critical(producto)
-            _logger.critical('--------BOM ID ENCONTRADO----------')
-            _logger.critical(bom_id)
+            # _logger.critical('--------PRODUCTO ENCONTRADO----------')
+            # _logger.critical(producto)
+            # _logger.critical('--------BOM ID ENCONTRADO----------')
+            # _logger.critical(bom_id)
 
             # Obtener compañía:
             company_id = self.env.company
@@ -788,19 +788,19 @@ class FormularioValidacion(models.Model):
                 #     move.action_confirm()
                 #     bom_line.unlink()
                 # mo.picking_type_id = bom_id.picking_type_id
-                _logger.critical('--------MOVE_RAW_IDs----------')
-                _logger.critical('------------------------------')
-                _logger.critical(production_id.move_raw_ids)
-                _logger.critical(production_id._onchange_move_raw())
-                _logger.critical(production_id._onchange_location())
+                # _logger.critical('--------MOVE_RAW_IDs----------')
+                # _logger.critical('------------------------------')
+                # _logger.critical(production_id.move_raw_ids)
+                # _logger.critical(production_id._onchange_move_raw())
+                # _logger.critical(production_id._onchange_location())
                 # _logger.critical(production_id._get_moves_raw_values())
                 # _logger.critical(production_id.action_assign())
-                _logger.critical(production_id._get_moves_raw_values())
+                # _logger.critical(production_id._get_moves_raw_values())
                 # _logger.critical(production_id.move_raw_ids._adjust_procure_method())
                 # _logger.critical(production_id.button_plan())
                 # _logger.critical(production_id._get_ready_to_produce_state())
-                _logger.critical(production_id._generate_finished_moves())
-                _logger.critical('------------------------------')
+                # _logger.critical(production_id._generate_finished_moves())
+                # _logger.critical('------------------------------')
 
                 production_id._get_moves_raw_values()
                 production_id._generate_finished_moves()
@@ -815,23 +815,23 @@ class FormularioValidacion(models.Model):
 
                 all_purchase_orders = self.env['purchase.order'].search([('state', '=', 'draft')], order='id asc')
 
-                _logger.critical('--------ORDEN COMPRA ----------')
-                _logger.critical('----------------------------------')
-                _logger.critical(all_purchase_orders)
-                _logger.critical('----------------------------------')
+                # _logger.critical('--------ORDEN COMPRA ----------')
+                # _logger.critical('----------------------------------')
+                # _logger.critical(all_purchase_orders)
+                # _logger.critical('----------------------------------')
 
                 for order in all_purchase_orders:
                     order.button_confirm()
 
-                _logger.critical('--------ORDEN PRODUCCIÓN----------')
-                _logger.critical('----------------------------------')
-                _logger.critical(production_id)
-                _logger.critical('----------------------------------')
+                # _logger.critical('--------ORDEN PRODUCCIÓN----------')
+                # _logger.critical('----------------------------------')
+                # _logger.critical(production_id)
+                # _logger.critical('----------------------------------')
 
-                _logger.critical('--------ORDEN COMPRA ----------')
-                _logger.critical('----------------------------------')
-                _logger.critical(all_purchase_orders)
-                _logger.critical('----------------------------------')
+                # _logger.critical('--------ORDEN COMPRA ----------')
+                # _logger.critical('----------------------------------')
+                # _logger.critical(all_purchase_orders)
+                # _logger.critical('----------------------------------')
             else:
                 raise exceptions.UserError("El proyecto no se ha encontrado o el nombre ha cambiado.")
         else:
@@ -842,7 +842,7 @@ class FormularioValidacion(models.Model):
     def action_realizar_final(self):
         total_boom_line_ids = None
 
-        _logger.critical("Realizar proyecto")
+        # _logger.critical("Realizar proyecto")
         '''
             TODO:
                 Traer todas las áreas diligenciadas del formulario de falicación
@@ -932,8 +932,8 @@ class FormularioValidacion(models.Model):
         else:
             total_boom_line_ids += self.areas_cliente
 
-        _logger.critical("BOM: AREAS CLIENTE: ")
-        _logger.critical(self.areas_cliente)
+        # _logger.critical("BOM: AREAS CLIENTE: ")
+        # _logger.critical(self.areas_cliente)
 
         for area_derivada in self.areas_derivadas:
             # _logger.critical("BOM: AREAS DERIVADAS: ")
@@ -941,10 +941,10 @@ class FormularioValidacion(models.Model):
             # _logger.critical(area_derivada)
             # area_derivada.product_tmpl_id = product_template.id # Cambia el producto asociado, no sirve, se debe duplicar
             # Create Product
-            _logger.critical("BOM: AREAS DERIVADAS: ")
-            _logger.critical(area_derivada)
-            _logger.critical(area_derivada.product_tmpl_id)
-            _logger.critical(area_derivada.product_id)
+            # _logger.critical("BOM: AREAS DERIVADAS: ")
+            # _logger.critical(area_derivada)
+            # _logger.critical(area_derivada.product_tmpl_id)
+            # _logger.critical(area_derivada.product_id)
 
             BomLine.create({
                 'bom_id': bom_created.id,
@@ -961,10 +961,10 @@ class FormularioValidacion(models.Model):
         for area_diseño in self.areas_diseño:
             # area_diseño.product_tmpl_id = product_template.id
             # Create Product
-            _logger.critical("BOM: AREAS DISEÑO: ")
-            _logger.critical(area_diseño)
-            _logger.critical(area_diseño.product_tmpl_id)
-            _logger.critical(area_diseño.product_id)
+            # _logger.critical("BOM: AREAS DISEÑO: ")
+            # _logger.critical(area_diseño)
+            # _logger.critical(area_diseño.product_tmpl_id)
+            # _logger.critical(area_diseño.product_id)
 
             BomLine.create({
                 'bom_id': bom_created.id,
@@ -988,11 +988,11 @@ class FormularioValidacion(models.Model):
                 'product_qty': bom_without_attrs.cantidad_final,
             })
 
-        _logger.critical('-------------------------------')
-        _logger.critical('--------TOTAL BOM IDs----------')
-        _logger.critical('-------------------------------')
-        _logger.critical(total_boom_line_ids)
-        _logger.critical('-------------------------------')
+        # _logger.critical('-------------------------------')
+        # _logger.critical('--------TOTAL BOM IDs----------')
+        # _logger.critical('-------------------------------')
+        # _logger.critical(total_boom_line_ids)
+        # _logger.critical('-------------------------------')
 
         self.state = 'done'
         # else:
@@ -1021,10 +1021,10 @@ class FormularioValidacion(models.Model):
             raise exceptions.UserError("Ya se encuentran creadas las órdenes de producción finales para éste proyecto.")
 
         bom_id = self.env['mrp.bom'].search([('product_tmpl_id', '=', product_template.id)], order='id asc')
-        _logger.critical('--------PRODUCTO ENCONTRADO----------')
-        _logger.critical(producto)
-        _logger.critical('--------BOM ID ENCONTRADO----------')
-        _logger.critical(bom_id)
+        # _logger.critical('--------PRODUCTO ENCONTRADO----------')
+        # _logger.critical(producto)
+        # _logger.critical('--------BOM ID ENCONTRADO----------')
+        # _logger.critical(bom_id)
 
         # Obtener compañía:
         company_id = self.env.company
@@ -1062,19 +1062,19 @@ class FormularioValidacion(models.Model):
             #     move.action_confirm()
             #     bom_line.unlink()
             # mo.picking_type_id = bom_id.picking_type_id
-            _logger.critical('--------MOVE_RAW_IDs----------')
-            _logger.critical('------------------------------')
-            _logger.critical(production_id.move_raw_ids)
-            _logger.critical(production_id._onchange_move_raw())
-            _logger.critical(production_id._onchange_location())
+            # _logger.critical('--------MOVE_RAW_IDs----------')
+            # _logger.critical('------------------------------')
+            # _logger.critical(production_id.move_raw_ids)
+            # _logger.critical(production_id._onchange_move_raw())
+            # _logger.critical(production_id._onchange_location())
             # _logger.critical(production_id._get_moves_raw_values())
             # _logger.critical(production_id.action_assign())
-            _logger.critical(production_id._get_moves_raw_values())
+            # _logger.critical(production_id._get_moves_raw_values())
             # _logger.critical(production_id.move_raw_ids._adjust_procure_method())
             # _logger.critical(production_id.button_plan())
             # _logger.critical(production_id._get_ready_to_produce_state())
-            _logger.critical(production_id._generate_finished_moves())
-            _logger.critical('------------------------------')
+            # _logger.critical(production_id._generate_finished_moves())
+            # _logger.critical('------------------------------')
 
             production_id._get_moves_raw_values()
             production_id._generate_finished_moves()
@@ -1088,23 +1088,23 @@ class FormularioValidacion(models.Model):
 
             all_purchase_orders = self.env['purchase.order'].search([('state', '=', 'draft')], order='id asc')
 
-            _logger.critical('--------ORDEN COMPRA ----------')
-            _logger.critical('----------------------------------')
-            _logger.critical(all_purchase_orders)
-            _logger.critical('----------------------------------')
+            # _logger.critical('--------ORDEN COMPRA ----------')
+            # _logger.critical('----------------------------------')
+            # _logger.critical(all_purchase_orders)
+            # _logger.critical('----------------------------------')
 
             for order in all_purchase_orders:
                 order.button_confirm()
 
-            _logger.critical('--------ORDEN PRODUCCIÓN----------')
-            _logger.critical('----------------------------------')
-            _logger.critical(production_id)
-            _logger.critical('----------------------------------')
+            # _logger.critical('--------ORDEN PRODUCCIÓN----------')
+            # _logger.critical('----------------------------------')
+            # _logger.critical(production_id)
+            # _logger.critical('----------------------------------')
 
-            _logger.critical('--------ORDEN COMPRA ----------')
-            _logger.critical('----------------------------------')
-            _logger.critical(all_purchase_orders)
-            _logger.critical('----------------------------------')
+            # _logger.critical('--------ORDEN COMPRA ----------')
+            # _logger.critical('----------------------------------')
+            # _logger.critical(all_purchase_orders)
+            # _logger.critical('----------------------------------')
         else:
             raise exceptions.UserError("El proyecto no se ha encontrado o el nombre ha cambiado.")
         # else:
@@ -1114,7 +1114,7 @@ class FormularioValidacion(models.Model):
         return True
 
     def action_calcular_areas(self):
-        _logger.critical("Calcular Áreas")
+        # _logger.critical("Calcular Áreas")
         self.total_m2_areas_cliente = 0
         self.total_m2_areas_derivadas = 0
         self.total_m2_areas_diseno = 0
@@ -1188,24 +1188,27 @@ class FormularioValidacion(models.Model):
                                 variable_texto = 'self.formulario_cliente.' + variable
                                 calculo_formula = calculo_formula.replace(variable, str(eval(variable_texto)))
                                 calculo_formula_final = calculo_formula_final.replace(variable, str(eval(variable_texto)))
-                                _logger.critical(variable_texto)
-                                _logger.critical(calculo_formula)
+                                # _logger.critical(variable_texto)
+                                # _logger.critical(calculo_formula)
 
                     for variable in find_vars_in_formula:
                         if variable in calculo_formula:
-                            raise exceptions.UserError("Una o más áreas dependientes no se han encontrado, por favor verifique que el área dependiente se encuentre en el listado de Áreas Cliente. Área: (" + variable + ")")
+                            calculo_formula = calculo_formula.replace(variable, str(0))
+                            calculo_formula_final = calculo_formula_final.replace(variable, str(0))
+                            # raise exceptions.UserError("Una o más áreas dependientes no se han encontrado, por favor verifique que el área dependiente se encuentre en el listado de Áreas Cliente. Área: (" + variable + ")")
+                            _logger.critical("Se ha asignado el valor de la variable (" + variable + ") por 0 (cero). Resultado de la fórmula: " + calculo_formula)
 
                     if formula_area_encontrada.variable_derivada == 'cantidad':
                         calculo_formula = calculo_formula.replace('"', '')
                         calculo_formula_final = calculo_formula_final.replace('"', '')
-                        _logger.critical(eval(calculo_formula))  # 1.4
+                        # _logger.critical(eval(calculo_formula))  # 1.4
                         area_derivada.product_qty = eval(calculo_formula)
                         area_derivada.cantidad_final = eval(calculo_formula_final)
 
                     if formula_area_encontrada.variable_derivada == 'area':
                         calculo_formula = calculo_formula.replace('"', '')
                         calculo_formula_final = calculo_formula_final.replace('"', '')
-                        _logger.critical(eval(calculo_formula))  # 1.4
+                        # _logger.critical(eval(calculo_formula))  # 1.4
                         area_derivada.m2 = eval(calculo_formula)
                         area_derivada.total_m2 = area_derivada.m2 * area_derivada.product_qty
 
@@ -1270,8 +1273,8 @@ class MrpProduction(models.Model):
             self.state = 'cancel'
             return True
         self._action_cancel_all()
-        _logger.critical('action_cancel_all')
-        _logger.critical(self.move_raw_ids)
+        # _logger.critical('action_cancel_all')
+        # _logger.critical(self.move_raw_ids)
         return True
 
     def _action_cancel_all(self):
@@ -1317,8 +1320,8 @@ class MrpProduction(models.Model):
 
 
         production_to_cancel = self.env['mrp.production'].search([('origin', '=', self.name)])
-        _logger.critical('_____action_cancel_all OOOK')
-        _logger.critical(production_to_cancel)
+        # _logger.critical('_____action_cancel_all OOOK')
+        # _logger.critical(production_to_cancel)
 
         for move in production_to_cancel:
             move.action_cancel_all()
