@@ -748,10 +748,10 @@ class FormularioValidacion(models.Model):
                 raise exceptions.UserError("Ya se encuentran creadas las órdenes de producción iniciales para éste proyecto.")
 
             bom_id = self.env['mrp.bom'].search([('product_tmpl_id', '=', product_template.id)], order='id asc')
-            # _logger.critical('--------PRODUCTO ENCONTRADO----------')
-            # _logger.critical(producto)
-            # _logger.critical('--------BOM ID ENCONTRADO----------')
-            # _logger.critical(bom_id)
+            _logger.critical('--------PRODUCTO ENCONTRADO----------')
+            _logger.critical(producto)
+            _logger.critical('--------BOM ID ENCONTRADO----------')
+            _logger.critical(bom_id)
 
             # Obtener compañía:
             company_id = self.env.company
@@ -769,6 +769,7 @@ class FormularioValidacion(models.Model):
                 production_id.product_qty = bom_id.product_qty
                 production_id.product_uom_id = bom_id.product_uom_id.id
                 production_id.move_raw_ids = [(2, move.id) for move in production_id.move_raw_ids.filtered(lambda x: not x.bom_line_id)]
+                production_id.bom_id = bom_id.id
                 # ////////////////////////////////
                 # for bom_line in bom_id:
                 #     # mo.move_raw_ids =
@@ -788,19 +789,19 @@ class FormularioValidacion(models.Model):
                 #     move.action_confirm()
                 #     bom_line.unlink()
                 # mo.picking_type_id = bom_id.picking_type_id
-                # _logger.critical('--------MOVE_RAW_IDs----------')
-                # _logger.critical('------------------------------')
-                # _logger.critical(production_id.move_raw_ids)
-                # _logger.critical(production_id._onchange_move_raw())
-                # _logger.critical(production_id._onchange_location())
-                # _logger.critical(production_id._get_moves_raw_values())
+                _logger.critical('--------MOVE_RAW_IDs----------')
+                _logger.critical('------------------------------')
+                _logger.critical(production_id.move_raw_ids)
+                _logger.critical(production_id._onchange_move_raw())
+                _logger.critical(production_id._onchange_location())
+                _logger.critical(production_id._get_moves_raw_values())
                 # _logger.critical(production_id.action_assign())
                 # _logger.critical(production_id._get_moves_raw_values())
                 # _logger.critical(production_id.move_raw_ids._adjust_procure_method())
                 # _logger.critical(production_id.button_plan())
                 # _logger.critical(production_id._get_ready_to_produce_state())
-                # _logger.critical(production_id._generate_finished_moves())
-                # _logger.critical('------------------------------')
+                _logger.critical(production_id._generate_finished_moves())
+                _logger.critical('------------------------------')
 
                 production_id._get_moves_raw_values()
                 production_id._generate_finished_moves()
@@ -1062,19 +1063,19 @@ class FormularioValidacion(models.Model):
             #     move.action_confirm()
             #     bom_line.unlink()
             # mo.picking_type_id = bom_id.picking_type_id
-            # _logger.critical('--------MOVE_RAW_IDs----------')
-            # _logger.critical('------------------------------')
-            # _logger.critical(production_id.move_raw_ids)
-            # _logger.critical(production_id._onchange_move_raw())
-            # _logger.critical(production_id._onchange_location())
-            # _logger.critical(production_id._get_moves_raw_values())
+            _logger.critical('--------MOVE_RAW_IDs----------')
+            _logger.critical('------------------------------')
+            _logger.critical(production_id.move_raw_ids)
+            _logger.critical(production_id._onchange_move_raw())
+            _logger.critical(production_id._onchange_location())
+            _logger.critical(production_id._get_moves_raw_values())
             # _logger.critical(production_id.action_assign())
             # _logger.critical(production_id._get_moves_raw_values())
             # _logger.critical(production_id.move_raw_ids._adjust_procure_method())
             # _logger.critical(production_id.button_plan())
             # _logger.critical(production_id._get_ready_to_produce_state())
-            # _logger.critical(production_id._generate_finished_moves())
-            # _logger.critical('------------------------------')
+            _logger.critical(production_id._generate_finished_moves())
+            _logger.critical('------------------------------')
 
             production_id._get_moves_raw_values()
             production_id._generate_finished_moves()
